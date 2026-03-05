@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Chess Repertoire Trainer</title>
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#13141b">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<link rel="stylesheet" href="https://unpkg.com/cm-chessboard@8/assets/chessboard.css">
+<link rel="stylesheet" href="https://unpkg.com/cm-chessboard@8/assets/extensions/markers/markers.css">
+<link rel="stylesheet" href="https://unpkg.com/cm-chessboard@8/assets/extensions/promotion-dialog/promotion-dialog.css">
+
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg2:      #13141b; --panel:    #21232e; --panel2:   #2a2d3a;
+  --border:   #2e3145; --border2:  #393d54;
+  --text:     #d0d2de; --text2:    #f0f1f8; --dim:      #585c76;
+  --green:    #5f9e43; --green-lt: #72bf50; --green-bg: rgba(95,158,67,.18);
+  --red:      #c0392b; --red-lt:   #e05040; --red-bg:   rgba(192,57,43,.18);
+  --blue:     #4a8fd4;
+  --gold:     #d4a017; --gold-bg:  rgba(212,160,23,.18); --gold-lt:  #f0c040;
+}
+html, body {
+  height: 100%; width: 100%; background: var(--bg2); color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 14px; overflow: hidden; user-select: none;
+}
+
+/* ── App shell ───────────────────────────────────────── */
+#app { display: flex; height: 100vh; padding: 10px 12px; gap: 12px; align-items: stretch; }
+
+/* ── Sidebar ─────────────────────────────────────────── */
+#sidebar { width: 250px; flex-shrink: 0; order: 2; }
+#sidebar-card {
+  width: 100%; height: 100%; background: var(--panel); border-radius: 14px;
+  border: 1px solid var(--border); box-shadow: 0 8px 24px rgba(0,0,0,.6);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.sb-logo { padding: 10px 14px 9px; display: flex; align-items: center; gap: 9px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.sb-logo-icon { width: 30px; height: 30px; border-radius: 7px; background: var(--green); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.sb-logo-name { font-size: 14px; font-weight: 800; color: var(--text2); letter-spacing: -.3px; }
+.sb-logo-sub  { font-size: 10px; color: var(--dim); }
+
+.sb-scores { display: flex; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.sbs { flex: 1; padding: 6px 8px; text-align: center; border-right: 1px solid var(--border); }
+.sbs:last-child { border-right: none; }
+.sbs .v { display: block; font-size: 18px; font-weight: 800; line-height: 1.1; }
+.sbs .l { font-size: 10px; text-transform: uppercase; letter-spacing: .7px; color: var(--dim); }
+.sbs.c .v { color: var(--green-lt); } .sbs.w .v { color: var(--red-lt); }
+
+.sb-hdr { padding: 5px 12px 3px; font-size: 10px; font-weight: 700; letter-spacing: 1.4px; text-transform: uppercase; color: var(--dim); background: var(--bg2); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+
+#pgn-panel { padding: 8px 12px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.pgn-row { display: flex; gap: 5px; margin-bottom: 6px; }
+.pgn-btn { flex: 1; padding: 6px 5px; border-radius: 7px; border: 1px solid var(--border2); background: var(--panel2); color: var(--text); cursor: pointer; font-size: 11px; font-weight: 600; text-align: center; transition: all .12s; }
+.pgn-btn:hover { border-color: var(--green); color: var(--green-lt); background: var(--bg2); }
+#pgn-paste { width: 100%; height: 52px; background: var(--bg2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 10px; font-family: monospace; padding: 5px 7px; resize: none; outline: none; transition: border-color .15s; user-select: text; }
+#pgn-paste:focus { border-color: var(--green); }
+#pgn-status { font-size: 10px; margin-top: 3px; min-height: 14px; color: var(--dim); }
+#pgn-status.ok { color: var(--green-lt); } #pgn-status.err { color: var(--red-lt); }
+
+#color-pick { display: flex; gap: 5px; padding: 6px 12px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.cbtn { flex: 1; padding: 6px 5px; border-radius: 7px; border: 2px solid var(--border2); background: var(--panel2); color: var(--dim); cursor: pointer; font-size: 11px; font-weight: 700; text-align: center; transition: all .12s; display: flex; align-items: center; justify-content: center; gap: 4px; }
+.cbtn:hover { border-color: #888; color: var(--text); }
+.cbtn.sw { border-color: #ccc; color: var(--text2); background: rgba(255,255,255,.07); }
+.cbtn.sb { border-color: #555; color: #bbb; background: rgba(0,0,0,.2); }
+
+#mode-toggle { display: flex; gap: 5px; padding: 6px 12px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.mbtn { flex: 1; padding: 6px 5px; border-radius: 7px; border: 2px solid var(--border2); background: var(--panel2); color: var(--dim); cursor: pointer; font-size: 11px; font-weight: 700; text-align: center; transition: all .12s; }
+.mbtn:hover { border-color: #888; color: var(--text); }
+.mbtn.active-practice { border-color: var(--green); color: var(--green-lt); background: var(--green-bg); }
+.mbtn.active-drill    { border-color: var(--gold);  color: var(--gold-lt);  background: var(--gold-bg); }
+
+#status-card { flex-shrink: 0; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; }
+.sb-btn { padding: 5px 9px; border-radius: 6px; border: 1px solid var(--border2); background: var(--panel2); color: var(--text); cursor: pointer; font-size: 11px; font-weight: 600; white-space: nowrap; transition: all .1s; flex-shrink: 0; }
+.sb-btn:hover { background: var(--bg2); border-color: var(--dim); color: var(--text2); }
+.sb-btn:disabled { opacity: .3; pointer-events: none; }
+
+#annotation { display: none; padding: 8px 12px 8px 36px; border-bottom: 1px solid var(--border); background: rgba(74,143,212,.06); position: relative; animation: fadeIn .18s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(-3px) } to { opacity:1; transform:none } }
+#annotation.show { display: block; }
+#annotation-icon  { position: absolute; left: 11px; top: 9px; font-size: 14px; }
+#annotation-label { font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--dim); margin-bottom: 2px; }
+#annotation-text  { font-size: 11px; color: #a8b0cc; font-style: italic; line-height: 1.6; }
+
+#movelist-row { padding: 6px 12px 5px; border-bottom: 1px solid var(--border); }
+#movelist-lbl { font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--dim); margin-bottom: 4px; }
+#movelist { display: flex; flex-wrap: wrap; gap: 1px 2px; font-size: 11px; font-family: monospace; max-height: 50px; overflow-y: auto; }
+#movelist::-webkit-scrollbar { width: 3px; }
+#movelist::-webkit-scrollbar-thumb { background: var(--border2); }
+.ml-n { color: var(--dim); padding: 1px 2px; }
+.ml-m { padding: 1px 4px; border-radius: 3px; color: #383d56; }
+.ml-m.done    { color: var(--text); }
+.ml-m.current { background: var(--green-bg); color: var(--green-lt); font-weight: 700; }
+.ml-m.annotated { position: relative; padding-right: 9px; }
+.ml-m.annotated::after { content: ""; position: absolute; top: 2px; right: 2px; width: 4px; height: 4px; border-radius: 50%; background: var(--blue); opacity: .85; }
+.ml-m.annotated.current::after { background: #fff; }
+
+#prog-row   { display: flex; align-items: center; gap: 8px; padding: 6px 12px; }
+#prog-track { flex: 1; height: 4px; background: var(--bg2); border-radius: 3px; overflow: hidden; }
+#prog-fill  { height: 100%; background: var(--green-lt); border-radius: 3px; transition: width .3s; }
+#prog-txt   { font-size: 10px; color: var(--dim); width: 40px; text-align: right; flex-shrink: 0; }
+
+#drill-footer { display: none; padding: 6px 12px; background: var(--gold-bg); border-bottom: 1px solid var(--border); flex-shrink: 0; font-size: 10px; color: var(--gold-lt); gap: 6px; align-items: center; }
+#drill-footer.show { display: flex; }
+#drill-footer-txt { flex: 1; }
+#drill-reset-btn { padding: 2px 9px; border-radius: 5px; cursor: pointer; font-size: 10px; font-weight: 700; background: transparent; border: 1px solid var(--gold); color: var(--gold-lt); }
+
+#btn-next-done-wrap { display: none; padding: 8px 12px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+
+/* ── Main (board column) ─────────────────────────────── */
+#main { flex: 1; min-width: 0; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; order: 1; overflow: hidden; }
+#welcome { text-align: center; max-width: 380px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.w-icon { font-size: 56px; line-height: 1; }
+#welcome h2 { font-size: 22px; font-weight: 800; color: var(--text2); }
+
+#trainer { display: none; flex-direction: column; align-items: center; gap: 6px; width: 100%; height: 100%; overflow: hidden; justify-content: center; }
+#bot-strip, #ctrl-row { width: var(--board-size, 560px); }
+#board-container { flex-shrink: 0; box-shadow: 0 0 0 1px rgba(255,255,255,.04), 0 4px 8px rgba(0,0,0,.45), 0 14px 44px rgba(0,0,0,.68); border-radius: 4px; overflow: hidden; }
+
+.cm-chessboard { --color-move-from-marker: rgba(255,210,0,.7); --color-move-to-marker: rgba(255,210,0,.7); --color-input-marker: rgba(255,210,0,.5); }
+.cm-chessboard .board .square.white { fill: #f0d9b5 !important; }
+.cm-chessboard .board .square.black { fill: #b58863 !important; }
+.cm-chessboard.border-type-frame .board .border       { fill: #2a2d3a !important; }
+.cm-chessboard.border-type-frame .board .border-inner { fill: #1a1c24 !important; stroke: #3d4152 !important; }
+.cm-chessboard .coordinates .coordinate { fill: #6b6f82 !important; font-size: 11px; font-weight: 600; }
+
+.pstrip { display: flex; align-items: center; gap: 8px; background: var(--panel); border-radius: 10px; padding: 6px 10px; border: 1px solid var(--border2); }
+.ps-ico img { width: 20px; height: 20px; display: block; }
+.ps-name { font-size: 12px; font-weight: 700; color: var(--text2); }
+.ps-tag  { font-size: 10px; font-weight: 700; padding: 2px 9px; border-radius: 20px; }
+.tag-you   { background: var(--green-bg); color: var(--green-lt); border: 1px solid rgba(95,158,67,.4); }
+.tag-drill { background: var(--gold-bg);  color: var(--gold-lt);  border: 1px solid rgba(212,160,23,.4); }
+
+#status-icon { width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; background: var(--panel2); border: 2px solid var(--border2); transition: all .2s; margin-left: 6px; }
+#status-msg  { flex: 1; font-size: 12px; font-weight: 700; color: var(--text2); transition: color .2s; }
+
+#bot-strip.s-correct { border-color: var(--green); background: var(--green-bg); }
+#bot-strip.s-correct #status-icon { background: var(--green); border-color: var(--green-lt); }
+#bot-strip.s-correct #status-msg  { color: var(--green-lt); }
+#bot-strip.s-wrong { border-color: var(--red); background: var(--red-bg); }
+#bot-strip.s-wrong #status-icon { background: var(--red); border-color: var(--red-lt); }
+#bot-strip.s-wrong #status-msg  { color: var(--red-lt); }
+#bot-strip.s-done { border-color: var(--green); background: var(--green-bg); }
+#bot-strip.s-done #status-icon { background: var(--green); border-color: var(--green-lt); }
+#bot-strip.s-done #status-msg  { color: var(--green-lt); }
+#bot-strip.s-think { background: rgba(74,143,212,.08); }
+#bot-strip.s-think #status-icon { background: var(--blue); border-color: #7ab5e8; }
+#bot-strip.s-think #status-msg  { color: var(--blue); }
+#bot-strip.s-drill { border-color: var(--gold); background: var(--gold-bg); }
+#bot-strip.s-drill #status-icon { background: var(--gold); border-color: var(--gold-lt); }
+#bot-strip.s-drill #status-msg  { color: var(--gold-lt); }
+
+#ctrl-row { display: flex; gap: 6px; flex-wrap: wrap; flex-shrink: 1; }
+.btn { padding: 7px 12px; border-radius: 8px; border: 1px solid var(--border2); background: var(--panel); color: var(--text); cursor: pointer; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 4px; transition: all .12s; white-space: nowrap; }
+.btn:hover { background: var(--panel2); border-color: var(--dim); color: var(--text2); }
+.btn.g { background: var(--green-bg); border-color: var(--green); color: var(--green-lt); }
+.btn.g:hover { background: rgba(95,158,67,.3); }
+.btn.r { background: var(--red-bg); border-color: var(--red); color: var(--red-lt); }
+.btn.r:hover { background: rgba(192,57,43,.28); }
+.btn:disabled { opacity: .35; pointer-events: none; }
+
+/* ── Tablet / mobile adjustments ────────────────────── */
+@media (max-width: 700px) {
+  #app { flex-direction: column; padding: 6px; gap: 6px; overflow-y: auto; height: auto; min-height: 100vh; }
+  #sidebar { width: 100%; order: 2; }
+  #main    { order: 1; height: auto; }
+  #trainer { height: auto; justify-content: flex-start; }
+  html, body { overflow: auto; }
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div id="sidebar">
+    <div id="sidebar-card">
+
+      <div class="sb-logo">
+        <div class="sb-logo-icon">♟</div>
+        <div><div class="sb-logo-name">Practice</div><div class="sb-logo-sub">Repertoire Trainer</div></div>
+      </div>
+
+      <div class="sb-scores">
+        <div class="sbs c"><span class="v" id="sc-c">0</span><span class="l">Correct</span></div>
+        <div class="sbs w"><span class="v" id="sc-w">0</span><span class="l">Wrong</span></div>
+        <div class="sbs"  ><span class="v" id="sc-pct" style="color:var(--text)">—</span><span class="l">Accuracy</span></div>
+      </div>
+
+      <div class="sb-hdr">Load PGN</div>
+      <div id="pgn-panel">
+        <div class="pgn-row">
+          <button class="pgn-btn" onclick="openFile()">📂 Open file</button>
+          <button class="pgn-btn" onclick="pasteLoad()">↳ Load text</button>
+        </div>
+        <textarea id="pgn-paste" placeholder="…or paste PGN here" style="margin-bottom:0"></textarea>
+        <div id="pgn-status"></div>
+      </div>
+
+      <div class="sb-hdr">Play as</div>
+      <div id="color-pick">
+        <div class="cbtn sw" id="cbtn-w" onclick="setColor('white')">♔ White</div>
+        <div class="cbtn"    id="cbtn-b" onclick="setColor('black')">♚ Black</div>
+      </div>
+
+      <div class="sb-hdr">Mode</div>
+      <div id="mode-toggle">
+        <div class="mbtn active-practice" id="mbtn-practice" onclick="setMode('practice')">📖 Practice</div>
+        <div class="mbtn"                 id="mbtn-drill"    onclick="setMode('drill')">🎯 Drill</div>
+      </div>
+
+      <div id="status-card">
+        <div id="annotation">
+          <div id="annotation-icon">💬</div>
+          <div id="annotation-label"></div>
+          <div id="annotation-text"></div>
+        </div>
+        <div id="movelist-row">
+          <div id="movelist-lbl">Moves</div>
+          <div id="movelist"></div>
+        </div>
+        <div id="prog-row">
+          <div id="prog-track"><div id="prog-fill" style="width:0%"></div></div>
+          <div id="prog-txt">0 / 0</div>
+        </div>
+      </div>
+
+      <div id="btn-next-done-wrap">
+        <button class="btn g" id="btn-next-done" style="width:100%;justify-content:center" onclick="nextAfterDone()">Next line →</button>
+      </div>
+
+      <div id="drill-footer">
+        <span id="drill-footer-txt"></span>
+        <button id="drill-reset-btn" onclick="drillReset()">↺ Reset</button>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="main">
+    <div id="welcome">
+      <div class="w-icon">♟</div>
+      <h2>Repertoire Trainer</h2>
+      <p style="color:var(--dim);font-size:13px">Open or paste a PGN file to begin</p>
+    </div>
+
+    <div id="trainer">
+      <div id="board-container"></div>
+      <div class="pstrip" id="bot-strip">
+        <div class="ps-ico" id="bot-ico"></div>
+        <span class="ps-name" id="bot-name"></span>
+        <span class="ps-tag"  id="bot-tag"></span>
+        <span id="status-icon">♟</span>
+        <span id="status-msg">—</span>
+        <button class="sb-btn" id="btn-hint" onclick="showHint()" disabled>💡 Hint</button>
+        <button class="sb-btn" id="btn-skip" onclick="doSkip()"   disabled>⏭ Skip</button>
+      </div>
+      <div id="ctrl-row">
+        <button class="btn g" onclick="restartLine()">↺ Restart</button>
+        <button class="btn"   id="btn-prev" onclick="prevLine()">‹ Prev</button>
+        <button class="btn"   id="btn-next" onclick="nextLine()">Next ›</button>
+        <button class="btn r" onclick="flipBoard()">⟳ Flip</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { Chess } from "https://unpkg.com/chess.js@1.3.0/dist/esm/chess.js";
+import { Chessboard, COLOR, INPUT_EVENT_TYPE, BORDER_TYPE }
+  from "https://unpkg.com/cm-chessboard@8/src/Chessboard.js";
+import { Markers, MARKER_TYPE }
+  from "https://unpkg.com/cm-chessboard@8/src/extensions/markers/Markers.js";
+import { PromotionDialog }
+  from "https://unpkg.com/cm-chessboard@8/src/extensions/promotion-dialog/PromotionDialog.js";
+
+// ── PWA service worker ───────────────────────────────────────────
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("./sw.js").catch(() => {});
+}
+
+// ── Sounds (Web Audio API — no files needed) ─────────────────────
+const AC = new (window.AudioContext || window.webkitAudioContext)();
+function beep(freq, dur, type = "sine", vol = 0.18) {
+  try {
+    const o = AC.createOscillator(), g = AC.createGain();
+    o.connect(g); g.connect(AC.destination);
+    o.type = type; o.frequency.value = freq;
+    g.gain.setValueAtTime(vol, AC.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, AC.currentTime + dur);
+    o.start(); o.stop(AC.currentTime + dur);
+  } catch(e) {}
+}
+function playSound(type) {
+  if (AC.state === "suspended") AC.resume();
+  if      (type === "move")    beep(440, .08, "sine", .12);
+  else if (type === "wrong")   { beep(180, .12, "sawtooth", .15); beep(160, .18, "sawtooth", .12); }
+  else if (type === "done")    { beep(523, .1); setTimeout(() => beep(659, .1), 110); setTimeout(() => beep(784, .18), 220); }
+  else if (type === "capture") beep(320, .1, "triangle", .14);
+}
+
+// ── PGN parsing (pure JS, replaces Python backend) ───────────────
+function parsePgn(text) {
+  // Strip ; comments
+  text = text.split("\n").filter(l => !l.trim().startsWith(";")).join("\n");
+  // Strip NAG suffixes like ! ?
+  text = text.replace(/[!?]+(\s)/g, "$1").replace(/[!?]+(\s*[{*])/g, " $1");
+
+  // Auto-detect plain move-list format (no headers, just "1. e4 e5 2. ...")
+  const isPlain = !text.includes("[") && !text.includes("{") && /1\./.test(text);
+  if (isPlain) return parsePlain(text);
+
+  const games = [];
+  // Split on game boundaries (lines starting with [Event or double newline before [)
+  const chunks = text.split(/(?=\[Event\s)/);
+  for (const chunk of chunks) {
+    if (!chunk.trim()) continue;
+    try {
+      const game = parseOnePgn(chunk.trim());
+      if (game && game.moves.length >= 1) games.push(game);
+    } catch(e) {}
+  }
+  // Fallback: try whole text as one game
+  if (!games.length) {
+    try {
+      const game = parseOnePgn(text.trim());
+      if (game && game.moves.length >= 1) games.push(game);
+    } catch(e) {}
+  }
+  return games;
+}
+
+function parseOnePgn(text) {
+  const nameMatch = text.match(/\[Event\s+"([^"]+)"\]/);
+  const name = nameMatch ? nameMatch[1] : "Line";
+
+  // Extract move text (after headers)
+  const moveText = text.replace(/\[[^\]]*\]/g, "").trim();
+  // Strip variations ( ... )
+  let stripped = "";
+  let depth = 0;
+  for (const ch of moveText) {
+    if (ch === "(") depth++;
+    else if (ch === ")") depth--;
+    else if (depth === 0) stripped += ch;
+  }
+  // Strip comments { ... }
+  stripped = stripped.replace(/\{[^}]*\}/g, " ");
+  // Extract comments in order for annotation
+  const comments = [...text.matchAll(/\{([^}]*)\}/g)].map(m => m[1].trim());
+
+  const chess = new Chess();
+  const tokens = stripped.trim().split(/\s+/).filter(t => t && !/^\d+\.+$/.test(t) && t !== "*" && t !== "1-0" && t !== "0-1" && t !== "1/2-1/2");
+  const moves = [];
+  let ci = 0;
+  for (const token of tokens) {
+    try {
+      const move = chess.move(token);
+      if (!move) break;
+      moves.push({
+        san:     move.san,
+        from:    move.from,
+        to:      move.to,
+        promo:   move.promotion ? move.promotion.toUpperCase() : "",
+        comment: comments[ci] || "",
+      });
+      // Advance comment index only when move has annotation in original text
+      if (comments[ci] !== undefined) ci++;
+    } catch(e) { break; }
+  }
+
+  // Re-parse with proper comment alignment
+  return buildWithComments(text, name);
+}
+
+function buildWithComments(text, name) {
+  // Walk the PGN properly to align comments with moves
+  const moveText = text.replace(/\[[^\]]*\]/g, "").trim();
+  // Remove variations
+  let flat = ""; let depth = 0;
+  for (const ch of moveText) {
+    if (ch === "(") depth++;
+    else if (ch === ")") depth--;
+    else if (depth === 0) flat += ch;
+  }
+  // Tokenise preserving {comments}
+  const tokens = [];
+  let i = 0;
+  while (i < flat.length) {
+    if (flat[i] === "{") {
+      const end = flat.indexOf("}", i);
+      tokens.push({ type: "comment", text: flat.slice(i+1, end).trim() });
+      i = end + 1;
+    } else if (/\s/.test(flat[i])) {
+      i++;
+    } else {
+      let j = i;
+      while (j < flat.length && !/\s/.test(flat[j]) && flat[j] !== "{") j++;
+      const tok = flat.slice(i, j);
+      if (tok && !/^\d+\.+$/.test(tok) && !["*","1-0","0-1","1/2-1/2"].includes(tok))
+        tokens.push({ type: "move", san: tok });
+      i = j;
+    }
+  }
+
+  const chess = new Chess();
+  const moves = [];
+  let pendingComment = "";
+  for (const tok of tokens) {
+    if (tok.type === "comment") {
+      pendingComment = tok.text;
+    } else {
+      try {
+        const move = chess.move(tok.san);
+        if (!move) break;
+        moves.push({ san: move.san, from: move.from, to: move.to, promo: move.promotion ? move.promotion.toUpperCase() : "", comment: pendingComment });
+        pendingComment = "";
+      } catch(e) { break; }
+    }
+  }
+  if (!moves.length) return null;
+  const last = moves[moves.length - 1];
+  const suffix = last ? ` (${Math.ceil(moves.length/2)}…${last.san})` : "";
+  return { name: name + suffix, moves };
+}
+
+function parsePlain(text) {
+  return text.split("\n").map((line, i) => {
+    line = line.trim(); if (!line) return null;
+    const chess = new Chess();
+    const tokens = line.split(/\s+/).filter(t => t && !/^\d+\.+$/.test(t));
+    const moves = [];
+    for (const tok of tokens) {
+      try {
+        const move = chess.move(tok);
+        if (!move) break;
+        moves.push({ san: move.san, from: move.from, to: move.to, promo: move.promotion ? move.promotion.toUpperCase() : "", comment: "" });
+      } catch(e) { break; }
+    }
+    if (!moves.length) return null;
+    const last = moves[moves.length - 1];
+    return { name: `Line ${i+1}  (${Math.ceil(moves.length/2)}…${last.san})`, moves };
+  }).filter(Boolean);
+}
+
+// ── State ────────────────────────────────────────────────────────
+const INIT_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+let chessEngine = new Chess();   // tracks live board state
+let S = {
+  games: [], gameIdx: -1, moves: [], moveIdx: 0, fen: INIT_FEN,
+  playerColor: "white", completed: new Set(), busy: false, scoreC: 0, scoreW: 0,
+  mode: "practice", drillQueue: [], drillDone: new Set(),
+};
+
+// ── Board sizing ─────────────────────────────────────────────────
+const BOARD_MIN = 280, BOARD_MAX = 960;
+const SIDEBAR_W = 250, APP_PAD_H = 20, APP_PAD_W = 24, APP_GAP = 12;
+const COL_CHROME_H = 40 + 38 + 12;
+let _pendingResize = null, _lastSnapped = 0;
+
+function applyBoardSize() {
+  if (_pendingResize) cancelAnimationFrame(_pendingResize);
+  _pendingResize = requestAnimationFrame(() => {
+    _pendingResize = null;
+    const winW = window.innerWidth, winH = window.innerHeight;
+    const isMobile = winW <= 700;
+    const availW = isMobile ? winW - APP_PAD_W : winW - APP_PAD_W - APP_GAP - SIDEBAR_W;
+    const availH = isMobile ? winH * 0.65 : winH - APP_PAD_H - COL_CHROME_H;
+    const size    = Math.max(BOARD_MIN, Math.min(BOARD_MAX, availW, availH));
+    const snapped = Math.floor(size / 8) * 8;
+    document.documentElement.style.setProperty("--board-size", snapped + "px");
+    if (snapped !== _lastSnapped) { _lastSnapped = snapped; recreateBoard(snapped); }
+  });
+}
+
+// ── Board ────────────────────────────────────────────────────────
+const ASSETS = "https://unpkg.com/cm-chessboard@8/assets/";
+let board = null;
+
+function recreateBoard(size) {
+  const el = document.getElementById("board-container");
+  if (board) { try { board.destroy(); } catch(e) {} board = null; el.innerHTML = ""; }
+  el.style.width = size + "px"; el.style.height = size + "px";
+  board = new Chessboard(el, {
+    position: S.fen || INIT_FEN,
+    orientation: S.playerColor === "black" ? COLOR.black : COLOR.white,
+    assetsUrl: ASSETS,
+    style: { cssClass: "default", borderType: BORDER_TYPE.frame, showCoordinates: true, pieces: { file: "pieces/staunty.svg" }, animationDuration: 200 },
+    extensions: [{ class: Markers }, { class: PromotionDialog }],
+  });
+  board.enableMoveInput(handleMoveInput);
+}
+
+recreateBoard(560);
+applyBoardSize();
+new ResizeObserver(applyBoardSize).observe(document.getElementById("app"));
+window.addEventListener("resize", applyBoardSize);
+
+// ── Move input ───────────────────────────────────────────────────
+function handleMoveInput(event) {
+  if (event.type === INPUT_EVENT_TYPE.moveInputStarted) {
+    const turn = chessEngine.turn() === "w" ? "white" : "black";
+    if (turn !== S.playerColor) return false;
+    // Show legal move dots
+    const legalSquares = chessEngine.moves({ square: event.squareFrom, verbose: true }).map(m => m.to);
+    if (!legalSquares.length) return false;
+    board.removeMarkers(MARKER_TYPE.dot);
+    legalSquares.forEach(sq => board.addMarker(MARKER_TYPE.dot, sq));
+    return true;
+  }
+
+  if (event.type === INPUT_EVENT_TYPE.validateMoveInput) {
+    board.removeMarkers(MARKER_TYPE.dot);
+    board.removeMarkers(MARKER_TYPE.beveledCorners);
+    const from = event.squareFrom, to = event.squareTo;
+    const prevFen = S.fen;
+    S.busy = true;
+
+    (async () => {
+      let promo = "";
+      if (isPromotion(from, to)) {
+        promo = await askPromotion(event);
+        if (!promo) { board.setPosition(prevFen, false); S.busy = false; return; }
+      }
+
+      const exp = S.moves[S.moveIdx];
+      const isCorrect = exp && from === exp.from && to === exp.to &&
+        (!exp.promo || promo.toUpperCase() === exp.promo);
+
+      if (isCorrect) {
+        // Apply move to engine
+        chessEngine.move({ from, to, promotion: promo.toLowerCase() || undefined });
+        S.fen = chessEngine.fen();
+        S.moveIdx++;
+        document.getElementById("sc-c").textContent = ++S.scoreC;
+        updateAccuracy(); playSound("move");
+        setCard("correct", "✓", "Correct!");
+        showAnnotation(exp.comment, "You");
+        board.setPosition(S.fen, true);
+        updateProgress(); updateMovelist();
+        S.busy = false;
+        if (S.moveIdx >= S.moves.length) { finishLine(); return; }
+        setTimeout(() => { setCard("idle", "♟", "Your turn"); runOpponent(); }, 500);
+      } else {
+        board.setPosition(prevFen, false);
+        document.getElementById("sc-w").textContent = ++S.scoreW;
+        updateAccuracy(); playSound("wrong");
+        setCard("wrong", "✗", "Wrong move — try again!");
+        setTimeout(() => { setCard("idle", "♟", "Your turn"); S.busy = false; }, 1400);
+      }
+    })();
+    return true;
+  }
+
+  if (event.type === INPUT_EVENT_TYPE.moveInputCanceled) {
+    board.removeMarkers(MARKER_TYPE.dot);
+    board.removeMarkers(MARKER_TYPE.beveledCorners);
+  }
+  return true;
+}
+
+function isPromotion(from, to) {
+  const moves = chessEngine.moves({ square: from, verbose: true });
+  return moves.some(m => m.to === to && m.promotion);
+}
+function askPromotion(event) {
+  return new Promise(resolve => {
+    board.showPromotionDialog(event.squareTo,
+      S.playerColor === "white" ? COLOR.white : COLOR.black,
+      result => resolve(result ? result.piece[1].toUpperCase() : ""));
+  });
+}
+
+// ── Opponent ─────────────────────────────────────────────────────
+async function runOpponent() {
+  if (S.moveIdx >= S.moves.length || S.busy) return;
+  if ((chessEngine.turn() === "w" ? "white" : "black") === S.playerColor) return;
+  S.busy = true;
+  setCard("think", "…", "Thinking…");
+  await delay(380);
+  const m = S.moves[S.moveIdx];
+  chessEngine.move({ from: m.from, to: m.to, promotion: m.promo.toLowerCase() || undefined });
+  S.fen = chessEngine.fen();
+  S.moveIdx++;
+  playSound("move"); showAnnotation(m.comment, "Book");
+  board.setPosition(S.fen, true);
+  updateProgress(); updateMovelist();
+  S.busy = false;
+  if (S.moveIdx >= S.moves.length) { finishLine(); return; }
+  const nextTurn = chessEngine.turn() === "w" ? "white" : "black";
+  if (nextTurn !== S.playerColor) setTimeout(() => runOpponent(), 350);
+  else setCard("idle", "♟", "Your turn");
+}
+
+// ── PGN loading ──────────────────────────────────────────────────
+function openFile() {
+  const input = document.createElement("input");
+  input.type = "file"; input.accept = ".pgn,.txt";
+  input.onchange = e => {
+    const file = e.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => loadGames(ev.target.result, file.name);
+    reader.readAsText(file);
+  };
+  input.click();
+}
+window.openFile = openFile;
+
+function pasteLoad() {
+  const text = document.getElementById("pgn-paste").value.trim();
+  if (!text) { setPgnStatus("Paste PGN text first", false); return; }
+  loadGames(text, null);
+}
+window.pasteLoad = pasteLoad;
+
+function loadGames(text, filename) {
+  try {
+    const games = parsePgn(text);
+    if (!games.length) { setPgnStatus("No valid games found", false); return; }
+    S.games = games; S.completed = new Set();
+    setPgnStatus(`✓ ${filename ? filename + " — " : ""}${games.length} lines loaded`, true);
+    drillReset();
+    selectGame(0);
+  } catch(e) { setPgnStatus("Parse error: " + e.message, false); }
+}
+
+function setPgnStatus(msg, ok) {
+  const el = document.getElementById("pgn-status");
+  el.textContent = msg; el.className = ok ? "ok" : "err";
+}
+
+// ── Game selection ───────────────────────────────────────────────
+function selectGame(idx) {
+  S.gameIdx = idx;
+  const game = S.games[idx];
+  S.moves = game.moves; S.moveIdx = 0;
+  chessEngine = new Chess();
+  S.fen = chessEngine.fen();
+  S.busy = false;
+
+  document.getElementById("welcome").style.display = "none";
+  document.getElementById("trainer").style.display = "flex";
+
+  board.setOrientation(S.playerColor === "white" ? COLOR.white : COLOR.black);
+  board.setPosition(S.fen, false);
+  try { board.removeMarkers(MARKER_TYPE.dot); } catch(e) {}
+  try { board.removeMarkers(MARKER_TYPE.frame); } catch(e) {}
+  board.disableMoveInput();
+  board.enableMoveInput(handleMoveInput);
+
+  updateStrip(); updateProgress(); updateMovelist(); showAnnotation("");
+
+  const isDrill = S.mode === "drill";
+  document.getElementById("btn-prev").style.display = isDrill ? "none" : "";
+  document.getElementById("btn-next").style.display = isDrill ? "none" : "";
+  document.getElementById("btn-next-done-wrap").style.display = "none";
+  document.getElementById("btn-hint").disabled = false;
+  document.getElementById("btn-skip").disabled = false;
+
+  if (isDrill) {
+    const total = S.games.length, done = S.drillDone.size;
+    setCard("drill", "🎯", `Line ${done + 1} of ${total}`);
+  } else {
+    setCard("idle", "♟", "Your turn");
+  }
+
+  if (S.playerColor === "black") setTimeout(() => runOpponent(), 400);
+}
+window.selectGame = selectGame;
+
+// ── Mode ─────────────────────────────────────────────────────────
+function setMode(mode) {
+  S.mode = mode;
+  document.getElementById("mbtn-practice").className = "mbtn" + (mode === "practice" ? " active-practice" : "");
+  document.getElementById("mbtn-drill").className    = "mbtn" + (mode === "drill"    ? " active-drill"    : "");
+  if (mode === "drill") drillReset();
+  else document.getElementById("drill-footer").classList.remove("show");
+  if (S.gameIdx >= 0) selectGame(S.gameIdx);
+}
+window.setMode = setMode;
+
+// ── Drill ─────────────────────────────────────────────────────────
+function drillReset() {
+  S.drillQueue = shuffle([...Array(S.games.length).keys()]);
+  S.drillDone  = new Set();
+  updateDrillFooter();
+}
+window.drillReset = drillReset;
+
+function updateDrillFooter() {
+  const footer = document.getElementById("drill-footer");
+  if (S.mode !== "drill" || !S.games.length) { footer.classList.remove("show"); return; }
+  footer.classList.add("show");
+  const done = S.drillDone.size, total = S.games.length;
+  document.getElementById("drill-footer-txt").textContent =
+    done === total ? `🏆 All ${total} lines drilled!` : `🎯 ${done} / ${total} done`;
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// ── Colour ────────────────────────────────────────────────────────
+function setColor(c) {
+  S.playerColor = c;
+  document.getElementById("cbtn-w").className = "cbtn" + (c === "white" ? " sw" : "");
+  document.getElementById("cbtn-b").className = "cbtn" + (c === "black" ? " sb" : "");
+  if (S.gameIdx >= 0) selectGame(S.gameIdx);
+}
+window.setColor = setColor;
+
+function updateStrip() {
+  const wK = `data:image/svg+xml;utf8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 45"><g fill="none" stroke="#000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22.5 11.63V6M20 8h5" stroke-linejoin="miter"/><path d="M22.5 25s4.5-7.5 3-10.5c0 0-1-2.5-3-2.5s-3 2.5-3 2.5c-1.5 3 3 10.5 3 10.5" fill="#fff" stroke-linecap="butt"/><path d="M11.5 37c5.5 3.5 15.5 3.5 21 0v-7s9-4.5 6-10.5c-4-6.5-13.5-3.5-16 4V17s-5.5-3.5-10.5 0c-3 3.5-4.5 8 0 12l.5 8z" fill="#fff"/><path d="M11.5 30c5.5-3 15.5-3 21 0m-21 3.5c5.5-3 15.5-3 21 0m-21 3.5c5.5-3 15.5-3 21 0"/></g></svg>')}`;
+  const bK = `data:image/svg+xml;utf8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 45"><g fill="none" stroke="#000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22.5 11.63V6M20 8h5" stroke-linejoin="miter"/><path d="M22.5 25s4.5-7.5 3-10.5c0 0-1-2.5-3-2.5s-3 2.5-3 2.5c-1.5 3 3 10.5 3 10.5" fill="#1a1a1a" stroke-linecap="butt"/><path d="M11.5 37c5.5 3.5 15.5 3.5 21 0v-7s9-4.5 6-10.5c-4-6.5-13.5-3.5-16 4V17s-5.5-3.5-10.5 0c-3 3.5-4.5 8 0 12l.5 8z" fill="#1a1a1a"/><path d="M11.5 30c5.5-3 15.5-3 21 0m-21 3.5c5.5-3 15.5-3 21 0m-21 3.5c5.5-3 15.5-3 21 0" stroke="#fff"/></g></svg>')}`;
+  const fl  = board.getOrientation() === COLOR.black;
+  const col = fl ? (S.playerColor === "white" ? "black" : "white") : S.playerColor;
+  document.getElementById("bot-ico").innerHTML    = `<img src="${col==="white"?wK:bK}">`;
+  document.getElementById("bot-name").textContent = "You";
+  const t = document.getElementById("bot-tag");
+  t.textContent = S.mode === "drill" ? "Drill" : "Player";
+  t.className   = "ps-tag " + (S.mode === "drill" ? "tag-drill" : "tag-you");
+}
+
+// ── Hint / Skip ──────────────────────────────────────────────────
+function showHint() {
+  if (S.moveIdx >= S.moves.length || S.busy) return;
+  const m = S.moves[S.moveIdx]; if (!m) return;
+  try { board.removeMarkers(MARKER_TYPE.dot); board.removeMarkers(MARKER_TYPE.frame); } catch(e) {}
+  try { board.addMarker(MARKER_TYPE.frame, m.from); board.addMarker(MARKER_TYPE.frame, m.to); } catch(e) {}
+  setCard("idle", "💡", "Hint: " + m.san);
+}
+window.showHint = showHint;
+
+function doSkip() {
+  if (S.moveIdx >= S.moves.length || S.busy) return;
+  S.busy = true;
+  try { board.removeMarkers(MARKER_TYPE.dot); board.removeMarkers(MARKER_TYPE.frame); } catch(e) {}
+  const m = S.moves[S.moveIdx];
+  chessEngine.move({ from: m.from, to: m.to, promotion: m.promo.toLowerCase() || undefined });
+  S.fen = chessEngine.fen();
+  S.moveIdx++;
+  playSound("move"); showAnnotation(m.comment, "Book");
+  board.setPosition(S.fen, true);
+  updateProgress(); updateMovelist();
+  S.busy = false;
+  if (S.moveIdx >= S.moves.length) { finishLine(); return; }
+  const nextTurn = chessEngine.turn() === "w" ? "white" : "black";
+  if (nextTurn !== S.playerColor) setTimeout(() => runOpponent(), 350);
+  else setCard("idle", "♟", "Your turn");
+}
+window.doSkip = doSkip;
+
+// ── Navigation ───────────────────────────────────────────────────
+function restartLine() { if (S.gameIdx >= 0) selectGame(S.gameIdx); }
+window.restartLine = restartLine;
+function prevLine() { if (S.gameIdx > 0) selectGame(S.gameIdx - 1); }
+window.prevLine = prevLine;
+function nextLine() { if (S.gameIdx < S.games.length - 1) selectGame(S.gameIdx + 1); }
+window.nextLine = nextLine;
+function nextAfterDone() { nextLine(); }
+window.nextAfterDone = nextAfterDone;
+function flipBoard() { board.setOrientation(board.getOrientation() === COLOR.white ? COLOR.black : COLOR.white); updateStrip(); }
+window.flipBoard = flipBoard;
+
+function finishLine() {
+  playSound("done");
+  board.disableMoveInput();
+  document.getElementById("btn-hint").disabled = true;
+  document.getElementById("btn-skip").disabled = true;
+  if (S.mode === "drill") {
+    S.drillDone.add(S.gameIdx); updateDrillFooter();
+    if (S.drillQueue.length > 0) {
+      setCard("done", "★", "Line done! Moving to next…");
+      setTimeout(() => selectGame(S.drillQueue.shift()), 1200);
+    } else { setCard("done", "🏆", "All lines drilled — great session!"); }
+  } else {
+    S.completed.add(S.gameIdx);
+    setCard("done", "★", "Line complete! Great job.");
+    document.getElementById("btn-next-done-wrap").style.display = "block";
+  }
+}
+
+// ── Helpers ──────────────────────────────────────────────────────
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+function esc(s) { return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+function setCard(state, icon, msg) {
+  document.getElementById("bot-strip").className = "pstrip s-" + state;
+  document.getElementById("status-icon").textContent = icon;
+  document.getElementById("status-msg").textContent  = msg;
+}
+
+function showAnnotation(text, who) {
+  const panel = document.getElementById("annotation");
+  const body  = document.getElementById("annotation-text");
+  const label = document.getElementById("annotation-label");
+  const icon  = document.getElementById("annotation-icon");
+  if (text && text.trim()) {
+    label.textContent = who === "You" ? "Your move" : "Book note";
+    icon.textContent  = who === "You" ? "💡" : "📖";
+    body.textContent  = text;
+    panel.classList.add("show");
+    panel.style.animation = "none"; void panel.offsetWidth; panel.style.animation = "";
+  } else {
+    panel.classList.remove("show"); body.textContent = label.textContent = "";
+  }
+}
+
+function updateAccuracy() {
+  const total = S.scoreC + S.scoreW;
+  document.getElementById("sc-pct").textContent = total > 0 ? Math.round(S.scoreC/total*100)+"%" : "—";
+}
+
+function updateProgress() {
+  const total = S.moves.length, done = Math.min(S.moveIdx, total);
+  document.getElementById("prog-fill").style.width = (total > 0 ? Math.round(done/total*100) : 0) + "%";
+  document.getElementById("prog-txt").textContent  = `${done} / ${total}`;
+}
+
+function updateMovelist() {
+  const el = document.getElementById("movelist");
+  el.innerHTML = S.moves.map((m, i) => {
+    const num     = i % 2 === 0 ? `<span class="ml-n">${Math.floor(i/2)+1}.</span>` : "";
+    const classes = ["ml-m", i < S.moveIdx ? "done" : "", i === S.moveIdx-1 ? "current" : "", m.comment ? "annotated" : ""].filter(Boolean).join(" ");
+    return num + `<span class="${classes}"${m.comment?` title="${esc(m.comment)}"`:""}}>${esc(m.san)}</span> `;
+  }).join("");
+  const cur = el.querySelector(".current");
+  if (cur) cur.scrollIntoView({ block: "nearest" });
+}
+
+// ── Keyboard shortcuts ───────────────────────────────────────────
+document.addEventListener("keydown", e => {
+  if (e.target.tagName === "TEXTAREA" || e.target.tagName === "INPUT") return;
+  if (e.key === "h" || e.key === "H") showHint();
+  if (e.key === "s" || e.key === "S") doSkip();
+  if (e.key === "r" || e.key === "R") restartLine();
+  if (e.key === "ArrowRight" && S.mode === "practice") nextLine();
+  if (e.key === "ArrowLeft"  && S.mode === "practice") prevLine();
+  if (e.key === "f" || e.key === "F") flipBoard();
+  if (e.key === "d" || e.key === "D") setMode(S.mode === "drill" ? "practice" : "drill");
+});
+</script>
+</body>
+</html>
