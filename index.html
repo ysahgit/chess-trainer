@@ -194,8 +194,9 @@ html, body {
 
       <div class="sb-hdr">Load PGN</div>
       <div id="pgn-panel">
+        <input type="file" id="pgn-file-input" accept=".pgn,.txt" style="display:none">
         <div class="pgn-row">
-          <button class="pgn-btn" onclick="openFile()">📂 Open file</button>
+          <label for="pgn-file-input" class="pgn-btn" style="cursor:pointer">📂 Open file</label>
           <button class="pgn-btn" onclick="pasteLoad()">↳ Load text</button>
         </div>
         <textarea id="pgn-paste" placeholder="…or paste PGN here" style="margin-bottom:0"></textarea>
@@ -598,18 +599,14 @@ async function runOpponent() {
 }
 
 // ── PGN loading ──────────────────────────────────────────────────
-function openFile() {
-  const input = document.createElement("input");
-  input.type = "file"; input.accept = ".pgn,.txt";
-  input.onchange = e => {
-    const file = e.target.files[0]; if (!file) return;
-    const reader = new FileReader();
-    reader.onload = ev => loadGames(ev.target.result, file.name);
-    reader.readAsText(file);
-  };
-  input.click();
-}
-window.openFile = openFile;
+document.getElementById("pgn-file-input").addEventListener("change", e => {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => loadGames(ev.target.result, file.name);
+  reader.onerror = () => setPgnStatus("Could not read file", false);
+  reader.readAsText(file);
+  e.target.value = ""; // reset so same file can be reloaded
+});
 
 function pasteLoad() {
   const text = document.getElementById("pgn-paste").value.trim();
