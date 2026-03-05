@@ -273,10 +273,22 @@ html, body {
 </div>
 
 <script>
-// File input must be accessible before module loads
 function triggerFileInput() {
   document.getElementById("pgn-file-input").click();
 }
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("pgn-file-input").addEventListener("change", e => {
+    const file = e.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      if (window.loadGames) window.loadGames(ev.target.result, file.name);
+      else alert("App not ready yet, try again in a moment");
+    };
+    reader.onerror = () => { if (window.setPgnStatus) window.setPgnStatus("Could not read file", false); };
+    reader.readAsText(file);
+    e.target.value = "";
+  });
+});
 </script>
 <script type="module">
 import { Chess } from "https://unpkg.com/chess.js@1.3.0/dist/esm/chess.js";
@@ -606,14 +618,6 @@ async function runOpponent() {
 }
 
 // ── PGN loading ──────────────────────────────────────────────────
-document.getElementById("pgn-file-input").addEventListener("change", e => {
-  const file = e.target.files[0]; if (!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => loadGames(ev.target.result, file.name);
-  reader.onerror = () => setPgnStatus("Could not read file", false);
-  reader.readAsText(file);
-  e.target.value = "";
-});
 
 function pasteLoad() {
   const text = document.getElementById("pgn-paste").value.trim();
@@ -632,11 +636,13 @@ function loadGames(text, filename) {
     selectGame(0);
   } catch(e) { setPgnStatus("Parse error: " + e.message, false); }
 }
+window.loadGames = loadGames;
 
 function setPgnStatus(msg, ok) {
   const el = document.getElementById("pgn-status");
   el.textContent = msg; el.className = ok ? "ok" : "err";
 }
+window.setPgnStatus = setPgnStatus;
 
 // ── Game selection ───────────────────────────────────────────────
 function selectGame(idx) {
