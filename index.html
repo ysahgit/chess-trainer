@@ -194,9 +194,10 @@ html, body {
 
       <div class="sb-hdr">Load PGN</div>
       <div id="pgn-panel">
-        <input type="file" id="pgn-file-input" accept=".pgn,.txt" style="display:none">
+        <input type="file" id="pgn-file-input" accept=".pgn,.txt"
+          style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none">
         <div class="pgn-row">
-          <label for="pgn-file-input" class="pgn-btn" style="cursor:pointer">📂 Open file</label>
+          <label for="pgn-file-input" class="pgn-btn" style="cursor:pointer;display:flex;align-items:center;justify-content:center" onclick="triggerFileInput()">📂 Open file</label>
           <button class="pgn-btn" onclick="pasteLoad()">↳ Load text</button>
         </div>
         <textarea id="pgn-paste" placeholder="…or paste PGN here" style="margin-bottom:0"></textarea>
@@ -271,6 +272,12 @@ html, body {
   </div>
 </div>
 
+<script>
+// File input must be accessible before module loads
+function triggerFileInput() {
+  document.getElementById("pgn-file-input").click();
+}
+</script>
 <script type="module">
 import { Chess } from "https://unpkg.com/chess.js@1.3.0/dist/esm/chess.js";
 import { Chessboard, COLOR, INPUT_EVENT_TYPE, BORDER_TYPE }
@@ -605,7 +612,7 @@ document.getElementById("pgn-file-input").addEventListener("change", e => {
   reader.onload = ev => loadGames(ev.target.result, file.name);
   reader.onerror = () => setPgnStatus("Could not read file", false);
   reader.readAsText(file);
-  e.target.value = ""; // reset so same file can be reloaded
+  e.target.value = "";
 });
 
 function pasteLoad() {
