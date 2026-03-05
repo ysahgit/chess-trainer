@@ -278,13 +278,21 @@ function triggerFileInput() {
 }
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("pgn-file-input").addEventListener("change", e => {
-    const file = e.target.files[0]; if (!file) return;
+    const file = e.target.files[0];
+    if (!file) {
+      if (window.setPgnStatus) window.setPgnStatus("No file selected", false);
+      return;
+    }
+    if (window.setPgnStatus) window.setPgnStatus("Reading " + file.name + "…", true);
     const reader = new FileReader();
     reader.onload = ev => {
-      if (window.loadGames) window.loadGames(ev.target.result, file.name);
-      else alert("App not ready yet, try again in a moment");
+      const text = ev.target.result;
+      if (window.loadGames) window.loadGames(text, file.name);
+      else if (window.setPgnStatus) window.setPgnStatus("App not ready, try again", false);
     };
-    reader.onerror = () => { if (window.setPgnStatus) window.setPgnStatus("Could not read file", false); };
+    reader.onerror = () => {
+      if (window.setPgnStatus) window.setPgnStatus("FileReader error: " + reader.error, false);
+    };
     reader.readAsText(file);
     e.target.value = "";
   });
@@ -579,19 +587,29 @@ async function runOpponent() {
 function pasteLoad() {
   const text = document.getElementById("pgn-paste").value.trim();
   if (!text) { setPgnStatus("Paste PGN text first", false); return; }
+  setPgnStatus(`Got ${text.length} chars, parsing…`, true);
   loadGames(text, null);
 }
 window.pasteLoad = pasteLoad;
 
 function loadGames(text, filename) {
   try {
+    // Show first 100 chars of received text so we know it arrived
+    setPgnStatus(`Parsing… (${text.length} chars received)`, true);
+    if (!text || !text.trim()) { setPgnStatus("Empty text received", false); return; }
     const games = parsePgn(text);
-    if (!games.length) { setPgnStatus("No valid games found", false); return; }
+    if (!games.length) {
+      // Show a snippet of what we got to help diagnose
+      setPgnStatus(`No games found. Text starts: "${text.trim().slice(0,60)}"`, false);
+      return;
+    }
     S.games = games; S.completed = new Set();
     setPgnStatus(`✓ ${filename ? filename + " — " : ""}${games.length} lines loaded`, true);
     drillReset();
     selectGame(0);
-  } catch(e) { setPgnStatus("Parse error: " + e.message, false); }
+  } catch(e) {
+    setPgnStatus("Error: " + e.message + " | " + e.stack?.slice(0,80), false);
+  }
 }
 window.loadGames = loadGames;
 
