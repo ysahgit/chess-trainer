@@ -14,7 +14,7 @@
 <link rel="stylesheet" href="https://unpkg.com/cm-chessboard@8/assets/extensions/promotion-dialog/promotion-dialog.css">
 
 <!-- chess.js plain script — exposes window.Chess -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.13.4/chess.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.js"></script>
 
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -449,7 +449,7 @@ function doValidate(from,to,promo,prevFen){
 }
 
 function runOpponent(){
-  if(S.moveIdx>=S.moves.length||S.busy) return;
+  if(!board||S.moveIdx>=S.moves.length||S.busy) return;
   if((chessEngine.turn()==="w"?"white":"black")===S.playerColor) return;
   S.busy=true; setCard("think","…","Thinking…");
   setTimeout(function(){
@@ -472,12 +472,12 @@ function selectGame(idx){
   chessEngine=newChess(); S.fen=chessEngine.fen(); S.busy=false;
   document.getElementById("welcome").style.display="none";
   document.getElementById("trainer").style.display="flex";
-  if(board){
-    board.setOrientation(S.playerColor==="white"?_COLOR.white:_COLOR.black);
-    board.setPosition(S.fen,false);
-    try{board.removeMarkers(_MT.dot);}catch(e){}
-    board.disableMoveInput(); board.enableMoveInput(handleMoveInput);
-  }
+  // If board not ready yet, it will be initialised by the module script
+  if(!board) { window._pendingGame=idx; return; }
+  board.setOrientation(S.playerColor==="white"?_COLOR.white:_COLOR.black);
+  board.setPosition(S.fen,false);
+  try{board.removeMarkers(_MT.dot);}catch(e){}
+  board.disableMoveInput(); board.enableMoveInput(handleMoveInput);
   updateStrip(); updateProgress(); updateMovelist(); showAnnotation("");
   var d=S.mode==="drill";
   document.getElementById("btn-prev").style.display=d?"none":"";
@@ -643,6 +643,28 @@ _BT    = window._BT    = BORDER_TYPE;
 _MT    = window._MT    = MARKER_TYPE;
 window._boardReady = true;
 applyBoardSize();
+// If a game was selected before board was ready, finish setting it up
+if (window._pendingGame !== undefined) {
+  var idx = window._pendingGame;
+  window._pendingGame = undefined;
+  // Board now exists after applyBoardSize — finish selectGame
+  setTimeout(function() {
+    board.setOrientation(S.playerColor==="white"?_COLOR.white:_COLOR.black);
+    board.setPosition(S.fen, false);
+    try{board.removeMarkers(_MT.dot);}catch(e){}
+    board.disableMoveInput(); board.enableMoveInput(handleMoveInput);
+    updateStrip(); updateProgress(); updateMovelist(); showAnnotation("");
+    var d=S.mode==="drill";
+    document.getElementById("btn-prev").style.display=d?"none":"";
+    document.getElementById("btn-next").style.display=d?"none":"";
+    document.getElementById("btn-next-done-wrap").style.display="none";
+    document.getElementById("btn-hint").disabled=false;
+    document.getElementById("btn-skip").disabled=false;
+    if(d) setCard("drill","🎯","Line "+(S.drillDone.size+1)+" of "+S.games.length);
+    else  setCard("idle","♟","Your turn");
+    if(S.playerColor==="black") setTimeout(runOpponent,400);
+  }, 50);
+}
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(()=>{});
 </script>
 </body>
