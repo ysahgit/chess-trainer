@@ -324,148 +324,105 @@ function playSound(type) {
   else if (type === "capture") beep(320, .1, "triangle", .14);
 }
 
-// ── PGN parsing (pure JS, replaces Python backend) ───────────────
+// ── PGN parsing ──────────────────────────────────────────────────
 function parsePgn(text) {
-  // Strip ; comments
+  // Strip ; line comments
   text = text.split("\n").filter(l => !l.trim().startsWith(";")).join("\n");
-  // Strip NAG suffixes like ! ?
-  text = text.replace(/[!?]+(\s)/g, "$1").replace(/[!?]+(\s*[{*])/g, " $1");
-
-  // Auto-detect plain move-list format (no headers, just "1. e4 e5 2. ...")
-  const isPlain = !text.includes("[") && !text.includes("{") && /1\./.test(text);
-  if (isPlain) return parsePlain(text);
+  // Strip NAG annotations like ! !! ? ??
+  text = text.replace(/[!?]+/g, "");
 
   const games = [];
-  // Split on game boundaries (lines starting with [Event or double newline before [)
-  const chunks = text.split(/(?=\[Event\s)/);
-  for (const chunk of chunks) {
-    if (!chunk.trim()) continue;
-    try {
-      const game = parseOnePgn(chunk.trim());
-      if (game && game.moves.length >= 1) games.push(game);
-    } catch(e) {}
+
+  // Split into individual game blocks
+  // A new game starts with [Event or at the beginning
+  const blocks = text.split(/\n(?=\[Event\s)/);
+
+  for (const block of blocks) {
+    if (!block.trim()) continue;
+    const game = parseBlock(block.trim());
+    if (game && game.moves.length >= 1) games.push(game);
   }
-  // Fallback: try whole text as one game
+
+  // If no games parsed with [Event] split, try whole text as one game
   if (!games.length) {
-    try {
-      const game = parseOnePgn(text.trim());
-      if (game && game.moves.length >= 1) games.push(game);
-    } catch(e) {}
+    const game = parseBlock(text.trim());
+    if (game && game.moves.length >= 1) games.push(game);
   }
+
   return games;
 }
 
-function parseOnePgn(text) {
+function parseBlock(text) {
+  // Extract name from Event header
   const nameMatch = text.match(/\[Event\s+"([^"]+)"\]/);
   const name = nameMatch ? nameMatch[1] : "Line";
 
-  // Extract move text (after headers)
-  const moveText = text.replace(/\[[^\]]*\]/g, "").trim();
-  // Strip variations ( ... )
-  let stripped = "";
+  // Remove all headers
+  let body = text.replace(/\[[^\]]*\]/g, "").trim();
+
+  // Remove variations (nested parentheses) - main line only
+  let flat = "";
   let depth = 0;
-  for (const ch of moveText) {
-    if (ch === "(") depth++;
-    else if (ch === ")") depth--;
-    else if (depth === 0) stripped += ch;
-  }
-  // Strip comments { ... }
-  stripped = stripped.replace(/\{[^}]*\}/g, " ");
-  // Extract comments in order for annotation
-  const comments = [...text.matchAll(/\{([^}]*)\}/g)].map(m => m[1].trim());
-
-  const chess = new Chess();
-  const tokens = stripped.trim().split(/\s+/).filter(t => t && !/^\d+\.+$/.test(t) && t !== "*" && t !== "1-0" && t !== "0-1" && t !== "1/2-1/2");
-  const moves = [];
-  let ci = 0;
-  for (const token of tokens) {
-    try {
-      const move = chess.move(token);
-      if (!move) break;
-      moves.push({
-        san:     move.san,
-        from:    move.from,
-        to:      move.to,
-        promo:   move.promotion ? move.promotion.toUpperCase() : "",
-        comment: comments[ci] || "",
-      });
-      // Advance comment index only when move has annotation in original text
-      if (comments[ci] !== undefined) ci++;
-    } catch(e) { break; }
-  }
-
-  // Re-parse with proper comment alignment
-  return buildWithComments(text, name);
-}
-
-function buildWithComments(text, name) {
-  // Walk the PGN properly to align comments with moves
-  const moveText = text.replace(/\[[^\]]*\]/g, "").trim();
-  // Remove variations
-  let flat = ""; let depth = 0;
-  for (const ch of moveText) {
-    if (ch === "(") depth++;
+  for (const ch of body) {
+    if      (ch === "(") depth++;
     else if (ch === ")") depth--;
     else if (depth === 0) flat += ch;
   }
-  // Tokenise preserving {comments}
+
+  // Tokenise into moves and {comments}
   const tokens = [];
   let i = 0;
   while (i < flat.length) {
     if (flat[i] === "{") {
       const end = flat.indexOf("}", i);
-      tokens.push({ type: "comment", text: flat.slice(i+1, end).trim() });
+      if (end === -1) break;
+      tokens.push({ type: "comment", val: flat.slice(i + 1, end).trim() });
       i = end + 1;
     } else if (/\s/.test(flat[i])) {
       i++;
     } else {
       let j = i;
-      while (j < flat.length && !/\s/.test(flat[j]) && flat[j] !== "{") j++;
-      const tok = flat.slice(i, j);
-      if (tok && !/^\d+\.+$/.test(tok) && !["*","1-0","0-1","1/2-1/2"].includes(tok))
-        tokens.push({ type: "move", san: tok });
+      while (j < flat.length && !/[\s{]/.test(flat[j])) j++;
+      const tok = flat.slice(i, j).trim();
+      // Skip move numbers (1. 1... 12.) and result tokens
+      if (tok && !/^\d+\.+$/.test(tok) && !["*","1-0","0-1","1/2-1/2"].includes(tok)) {
+        tokens.push({ type: "move", val: tok });
+      }
       i = j;
     }
   }
 
+  // Play through moves with chess.js, attaching comments
   const chess = new Chess();
   const moves = [];
   let pendingComment = "";
+
   for (const tok of tokens) {
     if (tok.type === "comment") {
-      pendingComment = tok.text;
-    } else {
-      try {
-        const move = chess.move(tok.san);
-        if (!move) break;
-        moves.push({ san: move.san, from: move.from, to: move.to, promo: move.promotion ? move.promotion.toUpperCase() : "", comment: pendingComment });
-        pendingComment = "";
-      } catch(e) { break; }
+      pendingComment = tok.val;
+      continue;
     }
+    let result;
+    try { result = chess.move(tok.val); } catch(e) { result = null; }
+    if (!result) {
+      // Try stripping check/checkmate symbols and retry
+      try { result = chess.move(tok.val.replace(/[+#]$/,"")); } catch(e) { result = null; }
+    }
+    if (!result) continue; // skip bad tokens, don't break
+    moves.push({
+      san:     result.san,
+      from:    result.from,
+      to:      result.to,
+      promo:   result.promotion ? result.promotion.toUpperCase() : "",
+      comment: pendingComment,
+    });
+    pendingComment = "";
   }
+
   if (!moves.length) return null;
   const last = moves[moves.length - 1];
-  const suffix = last ? ` (${Math.ceil(moves.length/2)}…${last.san})` : "";
-  return { name: name + suffix, moves };
-}
-
-function parsePlain(text) {
-  return text.split("\n").map((line, i) => {
-    line = line.trim(); if (!line) return null;
-    const chess = new Chess();
-    const tokens = line.split(/\s+/).filter(t => t && !/^\d+\.+$/.test(t));
-    const moves = [];
-    for (const tok of tokens) {
-      try {
-        const move = chess.move(tok);
-        if (!move) break;
-        moves.push({ san: move.san, from: move.from, to: move.to, promo: move.promotion ? move.promotion.toUpperCase() : "", comment: "" });
-      } catch(e) { break; }
-    }
-    if (!moves.length) return null;
-    const last = moves[moves.length - 1];
-    return { name: `Line ${i+1}  (${Math.ceil(moves.length/2)}…${last.san})`, moves };
-  }).filter(Boolean);
+  const label = `${name} (${Math.ceil(moves.length / 2)} moves, ends ${last.san})`;
+  return { name: label, moves };
 }
 
 // ── State ────────────────────────────────────────────────────────
