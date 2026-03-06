@@ -259,24 +259,104 @@ function pasteLoad() {
 
 // ── PGN parsing ──────────────────────────────────────────────────
 function parsePgn(text) {
-  text = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n"); // normalize line endings
-  text = text.split("\n").filter(function(l){ return l.trim()[0] !== ";"; }).join("\n");
+  text = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
   text = text.replace(/[!?]+/g, "");
+
   var games = [];
-  var blocks = text.split(/\n\s*\n(?=\[)/)  // split on blank line before [
-    .filter(function(b){ return b.trim(); });
-  // if only 1 block, also try splitting on [Event
-  if (blocks.length <= 1) blocks = text.split(/(?=\[Event\s)/);
-  for (var i = 0; i < blocks.length; i++) {
-    if (!blocks[i].trim()) continue;
-    var g = parseBlock(blocks[i].trim());
+
+  // ── Format 1: custom # header format ──────────────────────────
+  // e.g. "# Title
+#1 Line name
+1. e4 d5 2. Nc3"
+  if (text.trim().startsWith("#")) {
+    var sectionTitle = "";
+    var lines = text.split("\n");
+    var i = 0;
+    while (i < lines.length) {
+      var line = lines[i].trim();
+      // Top-level title (single #)
+      if (/^#(?!#|\d)/.test(line)) {
+        sectionTitle = line.replace(/^#+\s*/, "").trim();
+        i++; continue;
+      }
+      // Line header: #1, #2, ## etc followed by name
+      if (/^#/.test(line)) {
+        var lineName = line.replace(/^[#\d\s📖🎯♟]+/, "").trim() || line;
+        // Collect move text from following lines until next # or blank+#
+        var moveLines = [];
+        i++;
+        while (i < lines.length && !lines[i].trim().startsWith("#")) {
+          if (lines[i].trim()) moveLines.push(lines[i].trim());
+          i++;
+        }
+        var moveText = moveLines.join(" ").trim();
+        if (moveText) {
+          var g = parseMoveText(moveText, (sectionTitle ? sectionTitle + " — " : "") + lineName);
+          if (g && g.moves.length) games.push(g);
+        }
+        continue;
+      }
+      // Plain move line with no header
+      if (/\d+\./.test(line)) {
+        var g = parseMoveText(line, sectionTitle || ("Line " + (games.length + 1)));
+        if (g && g.moves.length) games.push(g);
+      }
+      i++;
+    }
+    if (games.length) return games;
+  }
+
+  // ── Format 2: standard PGN with [Event] headers ───────────────
+  var pgnText = text.split("\n").filter(function(l){ return l.trim()[0] !== ";"; }).join("\n");
+  var blocks = pgnText.split(/\n\s*\n(?=\[)/).filter(function(b){ return b.trim(); });
+  if (blocks.length <= 1) blocks = pgnText.split(/(?=\[Event\s)/);
+  for (var bi = 0; bi < blocks.length; bi++) {
+    if (!blocks[bi].trim()) continue;
+    var g = parseBlock(blocks[bi].trim());
     if (g && g.moves.length) games.push(g);
   }
   if (!games.length) {
-    var g = parseBlock(text.trim());
+    var g = parseBlock(pgnText.trim());
     if (g && g.moves.length) games.push(g);
   }
   return games;
+}
+
+function parseMoveText(moveText, name) {
+  // Strip {comments} but keep them for annotation
+  var tokens = [], i = 0;
+  while (i < moveText.length) {
+    if (moveText[i] === "{") {
+      var end = moveText.indexOf("}", i);
+      if (end < 0) break;
+      tokens.push({ type:"comment", val:moveText.slice(i+1,end).trim() });
+      i = end + 1;
+    } else if (/\s/.test(moveText[i])) {
+      i++;
+    } else {
+      var j = i;
+      while (j < moveText.length && !/[\s{]/.test(moveText[j])) j++;
+      var tok = moveText.slice(i,j);
+      if (tok && !/^\d+\.+$/.test(tok) && tok!=="*"&&tok!=="1-0"&&tok!=="0-1"&&tok!=="1/2-1/2")
+        tokens.push({ type:"move", val:tok });
+      i = j;
+    }
+  }
+  var engine = newChess();
+  var moves = [], pending = "";
+  for (var ti = 0; ti < tokens.length; ti++) {
+    var t = tokens[ti];
+    if (t.type === "comment") { pending = t.val; continue; }
+    var r = null;
+    try { r = engine.move(t.val); } catch(e){}
+    if (!r) try { r = engine.move(t.val.replace(/[+#]$/,"")); } catch(e){}
+    if (!r) continue;
+    moves.push({ san:r.san, from:r.from, to:r.to,
+      promo:r.promotion?r.promotion.toUpperCase():"", comment:pending });
+    pending = "";
+  }
+  if (!moves.length) return null;
+  return { name: name, moves: moves };
 }
 
 function parseBlock(text) {
