@@ -265,44 +265,53 @@ function parsePgn(text) {
   var games = [];
 
   // ── Format 1: custom # header format ──────────────────────────
-  // e.g. "# Title
-#1 Line name
-1. e4 d5 2. Nc3"
   if (text.trim().startsWith("#")) {
-    var sectionTitle = "";
     var lines = text.split("\n");
-    var i = 0;
-    while (i < lines.length) {
-      var line = lines[i].trim();
-      // Top-level title (single #)
-      if (/^#(?!#|\d)/.test(line)) {
-        sectionTitle = line.replace(/^#+\s*/, "").trim();
-        i++; continue;
-      }
-      // Line header: #1, #2, ## etc followed by name
-      if (/^#/.test(line)) {
-        var lineName = line.replace(/^[#\d\s📖🎯♟]+/, "").trim() || line;
-        // Collect move text from following lines until next # or blank+#
-        var moveLines = [];
-        i++;
-        while (i < lines.length && !lines[i].trim().startsWith("#")) {
-          if (lines[i].trim()) moveLines.push(lines[i].trim());
-          i++;
-        }
-        var moveText = moveLines.join(" ").trim();
-        if (moveText) {
-          var g = parseMoveText(moveText, (sectionTitle ? sectionTitle + " — " : "") + lineName);
-          if (g && g.moves.length) games.push(g);
-        }
-        continue;
-      }
-      // Plain move line with no header
-      if (/\d+\./.test(line)) {
-        var g = parseMoveText(line, sectionTitle || ("Line " + (games.length + 1)));
+    var sectionTitle = "";
+    var currentName = "";
+    var currentMoves = [];
+
+    function flushLine() {
+      if (currentName && currentMoves.length) {
+        var moveText = currentMoves.join(" ").trim();
+        var g = parseMoveText(moveText, currentName);
         if (g && g.moves.length) games.push(g);
       }
-      i++;
+      currentName = ""; currentMoves = [];
     }
+
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i].trim();
+      if (!line) continue;
+
+      if (line.startsWith("#")) {
+        // Strip leading # chars and digits to get the label
+        var label = line.replace(/^[# 	]+/, "").replace(/^\d+[. 	]*/, "").trim();
+        // Does it contain move notation? (has digits followed by dot)
+        var hasMoves = /\d+\./.test(label);
+
+        if (hasMoves) {
+          // inline: "#1 1. e4 e5" — flush previous, parse moves from label
+          flushLine();
+          currentName = "Line " + (games.length + 1);
+          currentMoves = [label];
+          flushLine();
+        } else if (label) {
+          // It's a title or line name
+          flushLine();
+          // If no sectionTitle yet, this is the section header
+          if (!sectionTitle && games.length === 0 && !currentName) {
+            sectionTitle = label;
+          } else {
+            currentName = (sectionTitle ? sectionTitle + " | " : "") + label;
+          }
+        }
+      } else if (/\d+\./.test(line)) {
+        // move line
+        currentMoves.push(line);
+      }
+    }
+    flushLine();
     if (games.length) return games;
   }
 
