@@ -10,8 +10,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cm-chessboard@8.7.8/assets/chessboard.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cm-chessboard@8.7.8/assets/extensions/markers/Markers.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cm-chessboard@8.7.8/assets/extensions/promotion-dialog/PromotionDialog.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cm-chessboard@8.7.8/assets/extensions/markers/markers.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cm-chessboard@8.7.8/assets/extensions/promotion-dialog/promotion-dialog.css">
 
 
 <!-- importmap resolves all module paths so they work from file:// and https:// -->
@@ -109,6 +109,9 @@ html,body{height:100%;width:100%;background:var(--bg2);color:var(--text);
 #bot-strip,#ctrl-row{width:var(--board-size,560px)}
 #board-container{flex-shrink:0;box-shadow:0 4px 8px rgba(0,0,0,.45),0 14px 44px rgba(0,0,0,.68);border-radius:4px;overflow:hidden}
 .cm-chessboard{--color-move-from-marker:rgba(255,210,0,.7);--color-move-to-marker:rgba(255,210,0,.7);--color-input-marker:rgba(255,210,0,.5)}
+/* marker dot styling for cm-chessboard v8 */
+.cm-chessboard .marker-dot circle{fill:rgba(0,0,0,.4)!important}
+.cm-chessboard .marker-frame rect,.cm-chessboard .marker-frame circle{fill:none!important;stroke:rgba(255,210,0,.8)!important;stroke-width:3px!important}
 .cm-chessboard .board .square.white{fill:#f0d9b5!important}.cm-chessboard .board .square.black{fill:#b58863!important}
 .cm-chessboard.border-type-frame .board .border{fill:#2a2d3a!important}
 .cm-chessboard.border-type-frame .board .border-inner{fill:#1a1c24!important;stroke:#3d4152!important}
