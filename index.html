@@ -224,6 +224,9 @@ html,body{height:100%;width:100%;background:var(--bg2);color:var(--text);
 <script>
 // Everything in a plain script — always available, no import issues
 
+// Board library globals — set by module script below
+var _COLOR, _IET, _BT, _MT;
+
 // ── Chess.js helper ──────────────────────────────────────────────
 function newChess() {
   if (!window._Chess) { setPgnStatus("chess.js not ready yet", false); throw new Error("chess.js missing"); }
@@ -396,7 +399,7 @@ function recreateBoard(size) {
   if(board){try{board.destroy()}catch(e){} board=null; el.innerHTML="";}
   el.style.width=size+"px"; el.style.height=size+"px";
   board=new window._Chessboard(el,{
-    position:S.fen||"start",
+    position:S.fen||(window._FEN?window._FEN.start:"start"),
     orientation:S.playerColor==="black"?_COLOR.black:_COLOR.white,
     assetsUrl:"https://cdn.jsdelivr.net/npm/cm-chessboard@8.7.8/assets/",
     style:{cssClass:"default",borderType:_BT.frame,showCoordinates:true,
@@ -641,19 +644,24 @@ window.addEventListener("resize",applyBoardSize);
 <!-- cm-chessboard needs ES module — runs after plain script, exposes globals -->
 <script type="module">
 try {
-var { Chess } = await import("chess.js");
-var { Chessboard, COLOR, INPUT_EVENT_TYPE, BORDER_TYPE } = await import("https://cdn.jsdelivr.net/npm/cm-chessboard@8.7.8/src/Chessboard.js");
-var { Markers, MARKER_TYPE } = await import("https://cdn.jsdelivr.net/npm/cm-chessboard@8.7.8/src/extensions/markers/Markers.js");
-var { PromotionDialog } = await import("https://cdn.jsdelivr.net/npm/cm-chessboard@8.7.8/src/extensions/promotion-dialog/PromotionDialog.js");
-window._Chess = Chess;
-
-window._Chessboard = Chessboard;
-window._Markers = Markers;
-window._PromotionDialog = PromotionDialog;
-_COLOR = window._COLOR = COLOR;
-_IET   = window._IET   = INPUT_EVENT_TYPE;
-_BT    = window._BT    = BORDER_TYPE;
-_MT    = window._MT    = MARKER_TYPE;
+var mod1 = await import("https://cdn.jsdelivr.net/npm/chess.js@1.3.0/+esm");
+var mod2 = await import("https://cdn.jsdelivr.net/npm/cm-chessboard@8.7.8/src/Chessboard.js");
+var mod3 = await import("https://cdn.jsdelivr.net/npm/cm-chessboard@8.7.8/src/extensions/markers/Markers.js");
+var mod4 = await import("https://cdn.jsdelivr.net/npm/cm-chessboard@8.7.8/src/extensions/promotion-dialog/PromotionDialog.js");
+window._Chess       = mod1.Chess;
+window._Chessboard  = mod2.Chessboard;
+window._Markers     = mod3.Markers;
+window._PromotionDialog = mod4.PromotionDialog;
+window._COLOR = mod2.COLOR;
+window._IET   = mod2.INPUT_EVENT_TYPE;
+window._BT    = mod2.BORDER_TYPE;
+window._MT    = mod3.MARKER_TYPE;
+window._FEN   = mod2.FEN;
+// Set plain script globals
+_COLOR = window._COLOR;
+_IET   = window._IET;
+_BT    = window._BT;
+_MT    = window._MT;
 window._boardReady = true;
 applyBoardSize();
 // If a game was selected before board was ready, finish setting it up
