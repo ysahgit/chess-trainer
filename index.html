@@ -663,7 +663,19 @@ _IET   = window._IET;
 _BT    = window._BT;
 _MT    = window._MT;
 window._boardReady = true;
-applyBoardSize();
+// Force board creation now — don't wait for resize event
+var _initSize = Math.max(280, Math.min(960,
+  window.innerWidth <= 700
+    ? window.innerWidth - 24
+    : window.innerWidth - 24 - 12 - 250,
+  window.innerWidth <= 700
+    ? window.innerHeight * 0.65
+    : window.innerHeight - 20 - 90
+));
+_initSize = Math.floor(_initSize / 8) * 8;
+document.documentElement.style.setProperty("--board-size", _initSize + "px");
+_ls = _initSize;
+recreateBoard(_initSize);
 // If a game was selected before board was ready, finish setting it up
 if (window._pendingGame !== undefined) {
   var idx = window._pendingGame;
