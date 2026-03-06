@@ -1416,7 +1416,7 @@ if (window._pendingGame !== undefined) {
     if(S.playerColor==="black") setTimeout(runOpponent,400);
   }, 50);
 }
-// service worker disabled
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(function(){});
 } catch(err) {
   console.error("Board load error:", err);
   setPgnStatus("Board error: " + err.message, false);
