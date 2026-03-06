@@ -9,9 +9,9 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 
-<link rel="stylesheet" href="https://unpkg.com/cm-chessboard@8/assets/chessboard.css">
-<link rel="stylesheet" href="https://unpkg.com/cm-chessboard@8/assets/extensions/markers/markers.css">
-<link rel="stylesheet" href="https://unpkg.com/cm-chessboard@8/assets/extensions/promotion-dialog/promotion-dialog.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cm-chessboard@8/assets/chessboard.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cm-chessboard@8/assets/extensions/markers/markers.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cm-chessboard@8/assets/extensions/promotion-dialog/promotion-dialog.css">
 
 <!-- chess.js plain script — exposes window.Chess -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.js"></script>
@@ -252,10 +252,14 @@ function pasteLoad() {
 
 // ── PGN parsing ──────────────────────────────────────────────────
 function parsePgn(text) {
+  text = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n"); // normalize line endings
   text = text.split("\n").filter(function(l){ return l.trim()[0] !== ";"; }).join("\n");
   text = text.replace(/[!?]+/g, "");
   var games = [];
-  var blocks = text.split(/\n(?=\[Event\s)/);
+  var blocks = text.split(/\n\s*\n(?=\[)/)  // split on blank line before [
+    .filter(function(b){ return b.trim(); });
+  // if only 1 block, also try splitting on [Event
+  if (blocks.length <= 1) blocks = text.split(/(?=\[Event\s)/);
   for (var i = 0; i < blocks.length; i++) {
     if (!blocks[i].trim()) continue;
     var g = parseBlock(blocks[i].trim());
@@ -390,7 +394,7 @@ function recreateBoard(size) {
   board=new window._Chessboard(el,{
     position:S.fen||INIT_FEN,
     orientation:S.playerColor==="black"?_COLOR.black:_COLOR.white,
-    assetsUrl:"https://unpkg.com/cm-chessboard@8/assets/",
+    assetsUrl:"https://cdn.jsdelivr.net/npm/cm-chessboard@8/assets/",
     style:{cssClass:"default",borderType:_BT.frame,showCoordinates:true,
            pieces:{file:"pieces/staunty.svg"},animationDuration:200},
     extensions:[{class:window._Markers},{class:window._PromotionDialog}]
@@ -440,11 +444,16 @@ function doValidate(from,to,promo,prevFen){
     if(S.moveIdx>=S.moves.length){finishLine();return;}
     setTimeout(function(){setCard("idle","♟","Your turn");runOpponent();},500);
   } else {
-    board.setPosition(prevFen,false);
+    // Return false to cm-chessboard so it cancels the move animation itself
     document.getElementById("sc-w").textContent=++S.scoreW;
     updateAccuracy(); playSound("wrong");
     setCard("wrong","✗","Wrong — try again!");
-    setTimeout(function(){setCard("idle","♟","Your turn");S.busy=false;},1400);
+    S.busy=false;
+    // Snap back by restoring position after animation frame
+    requestAnimationFrame(function(){
+      board.setPosition(prevFen,false);
+      setTimeout(function(){setCard("idle","♟","Your turn");},300);
+    });
   }
 }
 
@@ -628,11 +637,11 @@ window.addEventListener("resize",applyBoardSize);
 <!-- cm-chessboard needs ES module — runs after plain script, exposes globals -->
 <script type="module">
 import { Chessboard, COLOR, INPUT_EVENT_TYPE, BORDER_TYPE }
-  from "https://unpkg.com/cm-chessboard@8/src/Chessboard.js";
+  from "https://cdn.jsdelivr.net/npm/cm-chessboard@8/src/Chessboard.js";
 import { Markers, MARKER_TYPE }
-  from "https://unpkg.com/cm-chessboard@8/src/extensions/markers/Markers.js";
+  from "https://cdn.jsdelivr.net/npm/cm-chessboard@8/src/extensions/markers/Markers.js";
 import { PromotionDialog }
-  from "https://unpkg.com/cm-chessboard@8/src/extensions/promotion-dialog/PromotionDialog.js";
+  from "https://cdn.jsdelivr.net/npm/cm-chessboard@8/src/extensions/promotion-dialog/PromotionDialog.js";
 
 window._Chessboard = Chessboard;
 window._Markers = Markers;
