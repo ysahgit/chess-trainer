@@ -144,6 +144,11 @@ html,body{height:100%;width:100%;background:var(--bg2);color:var(--text);
   #sidebar{width:100%;order:2}#main{order:1;height:auto}
   #trainer{height:auto;justify-content:flex-start}html,body{overflow:auto}
 }
+
+.rep-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;padding:6px 12px;border-bottom:1px solid var(--border);flex-shrink:0}
+.rep-btn{padding:5px 4px;border-radius:7px;border:1px solid var(--border2);background:var(--panel2);
+  color:var(--text);cursor:pointer;font-size:10px;font-weight:600;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rep-btn:hover{border-color:var(--green);color:var(--green-lt);background:var(--bg2)}
 </style>
 </head>
 <body>
@@ -240,6 +245,379 @@ function newChess() {
 function setPgnStatus(msg, ok) {
   var el = document.getElementById("pgn-status");
   el.textContent = msg; el.className = ok ? "ok" : "err";
+}
+
+var BUILTIN_REPS = {
+  "Jobava": `#1 🎯 Queen Bait
+1. d4 d5 2. Nc3 Nf6 3. Bf4 Nc6 4. Nb5 e5 5. Bxe5 Nxe5 6. dxe5 Ne4 7. Qxd5 Qxd5 8. Nxc7+ Kd7 9. Nxd5
+#2 🎯 Rook Heist
+1. d4 d5 2. Nc3 Nf6 3. Bf4 Nc6 4. Nb5 e6 5. Nxc7+ Kd7 6. Nxa8
+#3 🎯 Fork Breaker
+1. d4 d5 2. Nc3 Nf6 3. Bf4 Nc6 4. Nb5 e5 5. Bxe5 Nxe5 6. dxe5 Nd7 7. Qxd5 c6 8. Nd6+ Bxd6 9. Qxd6
+#4 🎯 Central Pawn Grab
+1. d4 d5 2. Nc3 Nf6 3. Bf4 c5 4. e3 Nc6 5. Nb5 e5 6. Bxe5 Nxe5 7. dxe5 Nd7 8. Qxd5
+#5 🎯 Royal Fork Blitz
+1. d4 d5 2. Nc3 Nf6 3. Bf4 c5 4. e3 Nc6 5. Nb5 e5 6. Bxe5 Nxe5 7. dxe5 Ne4 8. Qxd5 Qxd5 9. Nc7+ Kd8 10. Nxd5
+#6 🎯 Knight Invasion
+1. d4 d5 2. Nc3 Nf6 3. Bf4 Bf5 4. f3 e6 5. g4 Bg6 6. h4 h6 7. e3 Bd6 8. Nh3 Bxf4 9. Nxf4 Bh7 10. g5 hxg5 11. hxg5 Nfd7 12. g6 fxg6 13. Nxe6 Qc8 14. Nxd5
+#7 🎯 Triple Fork Trap
+1. d4 d5 2. Nc3 Nf6 3. Bf4 c5 4. e3 Nc6 5. Nb5 e5 6. Bxe5 Nxe5 7. dxe5 Ng4 8. Qxd5 Qxd5 9. Nc7+ Kd8 10. Nxd5
+#8 🎯 Knight Shield
+1. d4 d5 2. Nc3 Nf6 3. Bf4 c5 4. e3 Nc6 5. Nb5 e5 6. Bxe5 Nxe5 7. dxe5 Ng4 8. Qxd5 Qa5+ 9. Nc3
+#9 🎯 B7 Plunder
+1. d4 d5 2. Nc3 Nf6 3. Bf4 c5 4. e3 Nc6 5. Nb5 e5 6. Bxe5 Nxe5 7. dxe5 Ne4 8. Qxd5 Qa5+ 9. c3 Bf5 10. Bc4 Bg6 11. Qxb7
+#10 🎯 Rook Pawn Raid
+1. d4 d5 2. Nc3 Nf6 3. Bf4 c5 4. e3 Nc6 5. Nb5 e5 6. Bxe5 Nxe5 7. dxe5 Ne4 8. Qxd5 Qa5+ 9. c3 Bf5 10. Bc4 Ng5 11. Qxb7
+#11 🎯 Queen Snatcher
+1. d4 d5 2. Nc3 Nf6 3. Bf4 e6 4. Nb5 Na6 5. e3 c6 6. Nc3 Nc7 7. Nf3 Bd6 8. Ne5 O-O 9. Bd3 c5 10. dxc5 Bxc5 11. Qf3 d4 12. exd4 Bxd4 13. O-O-O Bxc3 14. Bxh7+ Nxh7 15. Rxd8
+#12 🎯 H7 Sacrifice
+1. d4 d5 2. Nc3 Nf6 3. Bf4 e6 4. Nb5 Na6 5. e3 c6 6. Nc3 Nc7 7. Nf3 Bd6 8. Ne5 O-O 9. Bd3 c5 10. dxc5 Bxc5 11. Qf3 d4 12. exd4 Bxd4 13. O-O-O Ncd5 14. Bxh7+ Kxh7 15. Rxd4
+#13 🎯 Structure Crush
+1. d4 d5 2. Nc3 Nf6 3. Bf4 c5 4. e3 cxd4 5. exd4 a6 6. Nf3 Nc6 7. Ne5 Bf5 8. g4 Bg6 9. h4 h5 10. Nxg6 fxg6 11. g5
+#14 🎯 Bishop Cage
+1. d4 d5 2. Nc3 Nf6 3. Bf4 c5 4. e3 cxd4 5. exd4 a6 6. Nf3 Nc6 7. Ne5 Bf5 8. g4 Bg6 9. h4 Nxe5 10. dxe5 Ne4 11. Nxe4 Bxe4 12. f3
+#15 🎯 Queen's Perch
+1. d4 d5 2. Nc3 Nf6 3. Bf4 e6 4. Nb5 Na6 5. e3 c6 6. Nc3 Nc7 7. Nf3 Bd6 8. Ne5 O-O 9. Bd3 Bxe5 10. dxe5 Nd7 11. Qh5 g6 12. Qh6
+#16 🎯 Calm Defense
+1. d4 d5 2. Nc3 Nf6 3. Bf4 Bf5 4. f3 e6 5. g4 Bg6 6. h4 h5 7. g5 Nfd7 8. e3 c5 9. Nb5 Qa5+ 10. c3
+#17 🎯 Opposite Siege
+1. d4 d5 2. Nc3 Nf6 3. Bf4 c6 4. e3 Bf5 5. f3 e6 6. g4 Bg6 7. h4 h6 8. Bd3 Bxd3 9. Qxd3 Bd6 10. Nge2 O-O 11. O-O-O
+#18 🎯 C7 Pressure
+1. d4 d5 2. Nc3 Nf6 3. Bf4 Bf5 4. f3 e6 5. g4 Bg6 6. h4 h5 7. g5 Nfd7 8. e3 c5 9. Nb5 Na6 10. c3
+#19 🎯 Flank Ruin
+1. d4 d5 2. Nc3 Nf6 3. Bf4 e6 4. Nb5 Na6 5. e3 c6 6. Nc3 Bd6 7. Bxd6 Qxd6 8. Bxa6
+#20 🎯 Knight Advance
+1. d4 d5 2. Nc3 Nf6 3. Bf4 Bf5 4. f3 e6 5. g4 Bg6 6. h4 h5 7. g5 Nfd7 8. e3 Bd6 9. Bxd6 cxd6 10. Nh3 Nc6 11. Nf4
+#21 🎯 Pawn Splitter
+1. d4 d5 2. Nc3 Nf6 3. Bf4 e6 4. Nb5 Na6 5. e3 c6 6. Nc3 Bb4 7. Bxa6
+#22 🎯 Aggro Pawns
+1. d4 d5 2. Nc3 Nf6 3. Bf4 c5 4. e3 cxd4 5. exd4 a6 6. Nf3 Nc6 7. Ne5 Bf5 8. g4 Nxe5 9. gxf5 Nc6 10. Qd3
+#23 🎯 King's Flank Attack
+1. d4 d5 2. Nc3 Nf6 3. Bf4 c6 4. e3 Bf5 5. f3 e6 6. g4 Bg6 7. h4 h6 8. Bd3 Bxd3 9. Qxd3 Bd6 10. Nge2 Bxf4 11. Nxf4 Nbd7 12. O-O-O
+#24 🎯 Pawn Tsunami
+1. d4 d5 2. Nc3 Nf6 3. Bf4 c6 4. e3 Bf5 5. f3 e6 6. g4 Bg6 7. h4 h5 8. g5
+#25 🎯 Bishop Nab
+1. d4 d5 2. Nc3 Nf6 3. Bf4 e6 4. Nb5 Bd6 5. Nxd6+ cxd6 6. e3 Nc6 7. Nf3 O-O 8. c3 Re8 9. Be2 e5 10. Bg5
+#26 🎯 Safe Harbor
+1. d4 d5 2. Nc3 Nf6 3. Bf4 Bf5 4. f3 e6 5. g4 Bg6 6. h4 h6 7. e3 Bd6 8. Nh3 Nc6 9. Bd3 Bxd3 10. Qxd3 Bxf4 11. Nxf4 Qd6 12. O-O-O`,
+  "Jobava-S": `# Jobava London sidelines | Chessreps Opening Trainer
+#1 🎯 Unnamed Line
+1. d4 c5 2. d5 e6 3. e4 Nf6 4. Nc3
+#2 🎯 Unnamed Line
+1. d4 Nf6 2. Nc3 c5 3. e4 cxd4 4. Qxd4 Nc6 5. Qd3 e6 6. Bf4
+#3 🎯 Unnamed Line
+1. d4 Nf6 2. Nc3 e6 3. Bf4
+#4 🎯 Unnamed Line
+1. d4 Nf6 2. Nc3 g6 3. e4 d6 4. Be3 Bg7 5. Qd2 O-O 6. O-O-O
+#5 🎯 Unnamed Line
+1. d4 Nf6 2. Nc3 g6 3. e4 d6 4. Be3 Bg7 5. Qd2 O-O 6. O-O-O Nc6 7. h4
+#6 🎯 Unnamed Line
+1. d4 Nf6 2. Nc3 g6 3. e4 Bg7 4. e5 Nh5 5. g4
+#7 🎯 Unnamed Line
+1. d4 Nf6 2. Nc3 g6 3. e4 c6 4. e5 Nd5 5. Nxd5 cxd5 6. f4
+#8 🎯 Unnamed Line
+1. d4 Nf6 2. Nc3 d6 3. e4 e5 4. Nf3 exd4 5. Nxd4
+#9 🎯 Unnamed Line
+1. d4 e6 2. Nc3 d5 3. Bf4
+#10 🎯 Unnamed Line
+1. d4 d5 2. Nc3 c5 3. e4 dxe4 4. d5 Nf6 5. Nge2 e6 6. Nf4 exd5 7. Nfxd5 Nxd5 8. Qxd5 Qxd5 9. Nxd5
+#11 🎯 Unnamed Line
+1. d4 d5 2. Nc3 c5 3. e4 dxe4 4. d5 Nf6 5. Nge2 e6 6. Nf4 e5 7. Nh5
+#12 🎯 Unnamed Line
+1. d4 d5 2. Nc3 c5 3. e4 dxe4 4. d5 Nf6 5. Nge2 g6 6. Ng3 Bg7 7. Ngxe4
+#13 🎯 Unnamed Line
+1. d4 d5 2. Nc3 c5 3. e4 dxe4 4. d5 e6 5. Bb5+ Nd7 6. dxe6 fxe6 7. Nxe4
+#14 🎯 Unnamed Line
+1. d4 d5 2. Nc3 c5 3. e4 dxe4 4. d5 Nd7 5. Bf4 Qa5 6. Bd2
+#15 🎯 Unnamed Line
+1. d4 d5 2. Nc3 c5 3. e4 dxe4 4. d5 Bf5 5. f3 exf3 6. Qxf3 Bxc2 7. Bb5+ Nd7 8. Qe2
+#16 🎯 Unnamed Line
+1. d4 d5 2. Nc3 c5 3. e4 cxd4 4. Qxd4 dxe4 5. Qxd8+ Kxd8 6. Nge2
+#17 🎯 Unnamed Line
+1. d4 d5 2. Nc3 c5 3. e4 Nf6 4. e5 Nfd7 5. f4
+#18 🎯 Unnamed Line
+1. d4 d5 2. Nc3 c5 3. e4 e6 4. Bb5+ Bd7 5. exd5
+#19 🎯 Unnamed Line
+1. d4 d5 2. Nc3 Nf6 3. Bf4 Nh5 4. Be5 f6 5. Bg3 Nxg3 6. hxg3 Nc6 7. e3
+#20 🎯 Unnamed Line
+1. d4 d5 2. Nc3 Nf6 3. Bf4 Nh5 4. Be5 f6 5. Bg3 g6 6. e4 dxe4 7. Nxe4 Bf5 8. Nc3
+#21 🎯 Unnamed Line
+1. d4 d5 2. Nc3 Nc6 3. Bf4 a6 4. e3
+#22 🎯 Unnamed Line
+1. d4 d5 2. Nc3 Nc6 3. Bf4 Nf6 4. Nb5
+#23 🎯 Unnamed Line
+1. d4 d5 2. Nc3 Nc6 3. Bf4 e6 4. Nb5
+#24 🎯 Unnamed Line
+1. d4 d5 2. Nc3 e6 3. Bf4
+#25 🎯 Unnamed Line
+1. d4 d5 2. Nc3 Bf5 3. Bf4 e6 4. f3 Nf6 5. g4 Bg6 6. h4
+#26 🎯 Unnamed Line
+1. d4 d5 2. Nc3 Bf5 3. Bf4 Nf6 4. f3 e6 5. g4 Bg6 6. h4
+#27 🎯 Unnamed Line
+1. d4 f5 2. Nc3 Nf6 3. Bf4 e6 4. g4 Nxg4 5. e4
+#28 🎯 Unnamed Line
+1. d4 f5 2. Nc3 Nf6 3. Bf4 e6 4. g4 fxg4 5. h3
+#29 🎯 Unnamed Line
+1. d4 f5 2. Nc3 Nf6 3. Bf4 g6 4. h4 Bg7 5. h5 Nxh5 6. Rxh5 gxh5 7. e3
+#30 🎯 Unnamed Line
+1. d4 f5 2. Nc3 d5 3. Bf4 e6 4. Nb5 Bd6 5. Nxd6+ cxd6 6. e3
+#31 🎯 Unnamed Line
+1. d4 e5 2. dxe5 Nc6 3. Nf3 Qe7 4. Bf4 Qb4+ 5. Bd2 Qxb2 6. Nc3 Bb4 7. Rb1 Qa3 8. Nd5
+#32 🎯 Unnamed Line
+1. d4 g6 2. e4 Bg7 3. Nc3 d5 4. exd5 Nf6 5. Bc4`,
+  "Scandi Nf6": `# Modern scandinavian | Chessreps Opening Trainer
+#1 🎯 Intro
+1. e4 d5 2. exd5 Nf6 3. Nc3 Nxd5 4. Nxd5 Qxd5 5. Nf3 Nc6 6. Be2 Bg4 7. O-O O-O-O 8. d3 e5
+#2 🎯 Scandinavian defence : Modern variation Line 2
+1. e4 d5 2. exd5 Nf6 3. Nc3 Nxd5 4. Nxd5 Qxd5 5. Nf3 Nc6 6. d4 Nb4 7. c3 Qe4+
+#3 🎯 Scandinavian defence : Modern variation Line 3
+1. e4 d5 2. exd5 Nf6 3. Nc3 Nxd5 4. Nxd5 Qxd5 5. Nf3 Nc6 6. b3 Ne5
+#4 🎯 Scandinavian defence : Modern variation Line 4
+1. e4 d5 2. exd5 Nf6 3. Nc3 Nxd5 4. Nxd5 Qxd5 5. Nf3 Nc6 6. d3 e5 7. Be2 Bf5
+#5 🎯 Scandinavian defence : Modern variation Line 5
+1. e4 d5 2. exd5 Nf6 3. Nc3 Nxd5 4. Nxd5 Qxd5 5. Nf3 Nc6 6. c4 Qh5
+#6 🎯 Scandinavian defence : Modern variation Line 6
+1. e4 d5 2. exd5 Nf6 3. Nc3 Nxd5 4. Nxd5 Qxd5 5. d4 Nc6 6. Nf3 Nb4 7. c3 Qe4+
+#7 🎯 Scandinavian defence : Modern variation Line 7
+1. e4 d5 2. exd5 Nf6 3. Nc3 Nxd5 4. Nxd5 Qxd5 5. d4 Nc6 6. Nf3 Nb4 7. c4 Qe4+
+#8 🎯 Scandinavian defence : Modern variation Line 8
+1. e4 d5 2. exd5 Nf6 3. Nc3 Nxd5 4. Nxd5 Qxd5 5. d4 Nc6 6. c3 e5
+#9 🎯 Scandinavian defence : Modern variation Line 9
+1. e4 d5 2. exd5 Nf6 3. Nc3 Nxd5 4. Nxd5 Qxd5 5. Qf3 Be6 6. Qxd5 Bxd5
+#10 🎯 Scandinavian defence : Modern variation Line 10
+1. e4 d5 2. exd5 Nf6 3. Nc3 Nxd5 4. Nxd5 Qxd5 5. c4 Qe4+
+#11 🎯 Scandinavian defence : Modern variation Line 11
+1. e4 d5 2. exd5 Nf6 3. Nc3 Nxd5 4. Nxd5 Qxd5 5. d3 c5
+#12 🎯 Scandinavian defence : Modern variation Line 12
+1. e4 d5 2. exd5 Nf6 3. Nc3 Nxd5 4. Bc4 Be6 5. Qf3 c6
+#13 🎯 Scandinavian defence : Modern variation Line 13
+1. e4 d5 2. exd5 Nf6 3. Nc3 Nxd5 4. Bc4 Be6 5. Nxd5 Bxd5 6. Bxd5 Qxd5
+#14 🎯 Scandinavian defence : Modern variation Line 14
+1. e4 d5 2. exd5 Nf6 3. Nc3 Nxd5 4. Nf3 g6 5. Bc4 Be6
+#15 🎯 Scandinavian defence : Modern variation Line 15
+1. e4 d5 2. exd5 Nf6 3. Nc3 Nxd5 4. Nf3 g6 5. Nxd5 Qxd5
+#16 🎯 Scandinavian defence : Modern variation Line 16
+1. e4 d5 2. exd5 Nf6 3. Nc3 Nxd5 4. d4 Bf5 5. Nf3 Nb4 6. Bd3 Nxd3+ 7. cxd3 e6 8. O-O Nc6
+#17 🎯 Scandinavian defence : Modern variation Line 17
+1. e4 d5 2. exd5 Nf6 3. Nc3 Nxd5 4. d4 Bf5 5. Nxd5 Qxd5
+#18 🎯 Scandinavian defence : Modern variation Line 18
+1. e4 d5 2. exd5 Nf6 3. Nc3 Nxd5 4. Qf3 Nb4
+#19 🎯 Scandinavian defence : Modern variation Line 19
+1. e4 d5 2. exd5 Nf6 3. c4 c6 4. dxc6 e5 5. cxb7 Bxb7 6. Nf3 e4 7. Ng5 Bc5
+#20 🎯 Scandinavian defence : Modern variation Line 20
+1. e4 d5 2. exd5 Nf6 3. c4 c6 4. dxc6 e5 5. cxb7 Bxb7 6. Nf3 e4 7. Ng1 Bc5
+#21 🎯 Scandinavian defence : Modern variation Line 21
+1. e4 d5 2. exd5 Nf6 3. c4 c6 4. dxc6 e5 5. cxb7 Bxb7 6. Nf3 e4 7. Ne5 Bc5
+#22 🎯 Scandinavian defence : Modern variation Line 22
+1. e4 d5 2. exd5 Nf6 3. c4 c6 4. dxc6 e5 5. cxb7 Bxb7 6. Nc3 Bc5 7. d3 Qb6
+#23 🎯 Scandinavian defence : Modern variation Line 23
+1. e4 d5 2. exd5 Nf6 3. c4 c6 4. dxc6 e5 5. cxb7 Bxb7 6. Nc3 Bc5 7. Nf3 e4
+#24 🎯 Scandinavian defence : Modern variation Line 24
+1. e4 d5 2. exd5 Nf6 3. c4 c6 4. dxc6 e5 5. cxb7 Bxb7 6. d3 Bc5
+#25 🎯 Scandinavian defence : Modern variation Line 25
+1. e4 d5 2. exd5 Nf6 3. c4 c6 4. dxc6 e5 5. cxb7 Bxb7 6. f3 Bc5
+#26 🎯 Scandinavian defence : Modern variation Line 26
+1. e4 d5 2. exd5 Nf6 3. c4 c6 4. dxc6 e5 5. Nc3 Bc5
+#27 🎯 Scandinavian defence : Modern variation Line 27
+1. e4 d5 2. exd5 Nf6 3. c4 c6 4. dxc6 e5 5. d3 Bc5
+#28 🎯 Scandinavian defence : Modern variation Line 28
+1. e4 d5 2. exd5 Nf6 3. c4 c6 4. dxc6 e5 5. Nf3 e4
+#29 🎯 Scandinavian defence : Modern variation Line 29
+1. e4 d5 2. exd5 Nf6 3. c4 c6 4. Nc3 cxd5 5. cxd5 g6 6. Bc4 Bg7
+#30 🎯 Scandinavian defence : Modern variation Line 30
+1. e4 d5 2. exd5 Nf6 3. c4 c6 4. d4 cxd5 5. Nc3 g6
+#31 🎯 Scandinavian defence : Modern variation Line 31
+1. e4 d5 2. exd5 Nf6 3. d4 Bg4 4. Be2 Bxe2 5. Nxe2 Qxd5 6. O-O Nc6 7. Nbc3 Qh5
+#32 🎯 Scandinavian defence : Modern variation Line 32
+1. e4 d5 2. exd5 Nf6 3. d4 Bg4 4. Be2 Bxe2 5. Nxe2 Qxd5 6. O-O Nc6 7. c3 O-O-O
+#33 🎯 Scandinavian defence : Modern variation Line 33
+1. e4 d5 2. exd5 Nf6 3. d4 Bg4 4. Be2 Bxe2 5. Nxe2 Qxd5 6. O-O Nc6 7. c4 Qxc4
+#34 🎯 Scandinavian defence : Modern variation Line 34
+1. e4 d5 2. exd5 Nf6 3. d4 Bg4 4. Be2 Bxe2 5. Nxe2 Qxd5 6. Nbc3 Qxg2
+#35 🎯 Scandinavian defence : Modern variation Line 35
+1. e4 d5 2. exd5 Nf6 3. d4 Bg4 4. Be2 Bxe2 5. Qxe2 Qxd5 6. Nf3 e6
+#36 🎯 Scandinavian defence : Modern variation Line 36
+1. e4 d5 2. exd5 Nf6 3. d4 Bg4 4. f3 Bf5 5. c4 e6 6. dxe6 Nc6 7. exf7+ Kxf7 8. d5 Nb4 9. Na3 Bc5
+#37 🎯 Scandinavian defence : Modern variation Line 37
+1. e4 d5 2. exd5 Nf6 3. d4 Bg4 4. f3 Bf5 5. Bd3 Qxd5
+#38 🎯 Scandinavian defence : Modern variation Line 38
+1. e4 d5 2. exd5 Nf6 3. d4 Bg4 4. Nf3 Qxd5 5. Be2 Qh5 6. O-O Nc6
+#39 🎯 Unnamed Line
+1. e4 d5 2. exd5 Nf6 3. Nf3 Qxd5 4. Nc3 Qh5 5. Be2 Bg4
+#40 🎯 Scandinavian defence : Modern variation Line 39
+1. e4 d5 2. exd5 Nf6 3. Nf3 Qxd5 4. Nc3 Qh5 5. Be2 Bg4 6. O-O e6
+#41 🎯 Scandinavian defence : Modern variation Line 40
+1. e4 d5 2. exd5 Nf6 3. Nf3 Qxd5 4. Nc3 Qh5 5. Be2 Bg4 6. h3 Nc6
+#42 🎯 Scandinavian defence : Modern variation Line 41
+1. e4 d5 2. exd5 Nf6 3. Nf3 Qxd5 4. Nc3 Qh5 5. Be2 Bg4 6. d3 Nc6
+#43 🎯 Scandinavian defence : Modern variation Line 42
+1. e4 d5 2. exd5 Nf6 3. Nf3 Qxd5 4. Nc3 Qh5 5. Be2 Bg4 6. d4 Nc6
+#44 🎯 Scandinavian defence : Modern variation Line 43
+1. e4 d5 2. exd5 Nf6 3. Nf3 Qxd5 4. Nc3 Qh5 5. d4 Bg4
+#45 🎯 Scandinavian defence : Modern variation Line 44
+1. e4 d5 2. exd5 Nf6 3. Nf3 Qxd5 4. Be2 Bg4 5. O-O Qh5
+#46 🎯 Scandinavian defence : Modern variation Line 45
+1. e4 d5 2. exd5 Nf6 3. Nf3 Qxd5 4. Be2 Bg4 5. Nc3 Qh5
+#47 🎯 Unnamed Line
+1. e4 d5 2. exd5 Nf6 3. Nf3 Qxd5 4. Be2 Bg4 5. Nc3 Qh5 6. O-O e6
+#48 🎯 Unnamed Line
+1. e4 d5 2. exd5 Nf6 3. Nf3 Qxd5 4. Be2 Bg4 5. Nc3 Qh5 6. h3 Nc6
+#49 🎯 Unnamed Line
+1. e4 d5 2. exd5 Nf6 3. Nf3 Qxd5 4. Be2 Bg4 5. Nc3 Qh5 6. d3 Nc6
+#50 🎯 Unnamed Line
+1. e4 d5 2. exd5 Nf6 3. Nf3 Qxd5 4. Be2 Bg4 5. Nc3 Qh5 6. d4 Nc6
+#51 🎯 Scandinavian defence : Modern variation Line 46
+1. e4 d5 2. exd5 Nf6 3. Nf3 Qxd5 4. d4 Bg4 5. Be2 Qh5
+#52 🎯 Scandinavian defence : Modern variation Line 47
+1. e4 d5 2. exd5 Nf6 3. Nf3 Qxd5 4. c4 Qh5
+#53 🎯 Scandinavian defence : Modern variation Line 48
+1. e4 d5 2. exd5 Nf6 3. Bc4 Nxd5 4. Bxd5 Qxd5
+#54 🎯 Scandinavian defence : Modern variation Line 49
+1. e4 d5 2. exd5 Nf6 3. Bc4 Nxd5 4. Qf3 e6
+#55 🎯 Scandinavian defence : Modern variation Line 50
+1. e4 d5 2. exd5 Nf6 3. Bc4 Nxd5 4. Nf3 Bf5
+#56 🎯 Scandinavian defence : Modern variation Line 51
+1. e4 d5 2. exd5 Nf6 3. Bb5+ Nbd7 4. Nc3 g6
+#57 🎯 Scandinavian defence : Modern variation Line 52
+1. e4 d5 2. exd5 Nf6 3. Bb5+ Nbd7 4. c4 a6 5. Ba4 b5
+#58 🎯 Scandinavian defence : Modern variation Line 53
+1. e4 d5 2. exd5 Nf6 3. d6 Qxd6`,
+  "QGA": `# Queen's Gambit Accepted | Chessreps Opening Trainer
+#1 🎯 Knight's Gambit
+1. d4 d5 2. c4 dxc4 3. e4 b5 4. a4 c6 5. axb5 cxb5 6. Nc3 Bd7 7. d5 e6 8. dxe6 fxe6 9. Nxb5 Bxb5 10. Qh5+ g6 11. Qxb5+
+#2 🎯 Rook Heist
+1. d4 d5 2. c4 dxc4 3. e4 e5 4. Nf3 exd4 5. Bxc4 c5 6. Ne5 Be6 7. Bxe6 fxe6 8. Qh5+ g6 9. Nxg6 hxg6 10. Qxh8
+#3 🎯 Rook Snatch
+1. d4 d5 2. c4 dxc4 3. e4 b5 4. a4 a6 5. axb5 axb5 6. Rxa8
+#4 🎯 Kingside Raid
+1. d4 d5 2. c4 dxc4 3. e4 e6 4. Bxc4 Nf6 5. Nc3 Be7 6. e5 Nd5 7. Qg4 O-O 8. Bh6 g6 9. Bxf8
+#5 🎯 Royal Fork
+1. d4 d5 2. c4 dxc4 3. e4 e5 4. Nf3 Bg4 5. Bxc4 exd4 6. Bxf7+ Kxf7 7. Ne5+ Ke8 8. Qxg4
+#6 🎯 Sac & Fork
+1. d4 d5 2. c4 dxc4 3. e4 e5 4. Nf3 exd4 5. Bxc4 Nc6 6. O-O Bg4 7. Qb3 Qd7 8. Bxf7+ Qxf7 9. Qxb7 Rd8 10. Qxc6+
+#7 🎯 Swift Siege
+1. d4 d5 2. c4 dxc4 3. e4 e5 4. Nf3 exd4 5. Bxc4 Nc6 6. O-O Bg4 7. Qb3 Bxf3 8. Bxf7+ Ke7 9. Qe6#
+#8 🎯 Double Strike
+1. d4 d5 2. c4 dxc4 3. e4 b5 4. a4 bxa4 5. Qxa4+ Bd7 6. Qxc4
+#9 🎯 f7 Assault
+1. d4 d5 2. c4 dxc4 3. e4 e5 4. Nf3 Bg4 5. Bxc4 Bxf3 6. Qxf3
+#10 🎯 C7 Crush
+1. d4 d5 2. c4 dxc4 3. e4 b5 4. a4 c6 5. axb5 cxb5 6. Nc3 b4 7. Nb5 a6 8. Bf4 Bb7 9. Nc7+
+#11 🎯 Iron Grip
+1. d4 d5 2. c4 dxc4 3. e4 b5 4. a4 c6 5. axb5 cxb5 6. Nc3 Bd7 7. d5 a6 8. Nf3 e6 9. d6 Qb6 10. e5
+#12 🎯 Queen's Gaze
+1. d4 d5 2. c4 dxc4 3. e4 e5 4. Nf3 exd4 5. Bxc4 Nc6 6. O-O Be6 7. Nbd2 Nf6 8. Qb3 Bxc4 9. Nxc4
+#13 🎯 Pin & Pressure
+1. d4 d5 2. c4 dxc4 3. e4 e5 4. Nf3 exd4 5. Bxc4 c5 6. Ne5 Be6 7. Bxe6 fxe6 8. Qh5+ g6 9. Nxg6 Nf6 10. Qh3
+#14 🎯 Knight Skewer
+1. d4 d5 2. c4 dxc4 3. e4 b5 4. a4 c6 5. axb5 cxb5 6. Nc3 a6 7. Nxb5 axb5 8. Rxa8 Bb7 9. Ra2
+#15 🎯 Fortress Build
+1. d4 d5 2. c4 dxc4 3. e4 e6 4. Bxc4 Nf6 5. Nc3 Bb4 6. e5 Nd5 7. Ne2 O-O 8. O-O
+#16 🎯 Quiet Storm
+1. d4 d5 2. c4 dxc4 3. e4 e5 4. Nf3 exd4 5. Bxc4 Nc6 6. O-O Be6 7. Nbd2 Bxc4 8. Nxc4`,
+  "QGD": `# Queen's Gambit Declined | Chessreps Opening Trainer
+#1 🎯 Forking Queen
+1. d4 d5 2. c4 e6 3. Nc3 Bb4 4. e3 Nf6 5. a3 Bxc3+ 6. bxc3 O-O 7. cxd5 Nxd5 8. Bd3 Nxc3 9. Qc2 Nd5 10. Bxh7+ Kh8 11. Bd3
+#2 🎯 Tarrasch Trap
+1. d4 d5 2. c4 e6 3. Nc3 c5 4. cxd5 exd5 5. Nf3 Nc6 6. dxc5 Bxc5 7. Qxd5 Qxd5 8. Nxd5
+#3 🎯 Gambit Grip
+1. d4 d5 2. c4 e6 3. Nc3 c6 4. e4 Nf6 5. cxd5 cxd5 6. e5 Nfd7 7. Qg4
+#4 🎯 Blunder Punisher
+1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. cxd5 exd5 5. Bg5 Be7 6. e3 O-O 7. Bd3 b6 8. Bxf6 Bxf6 9. Qh5 g6 10. Qxd5
+#5 🎯 Center Break
+1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. cxd5 exd5 5. Bg5 Be7 6. e3 O-O 7. Bd3 c6 8. Qc2 h6 9. Bh4 Nbd7 10. Nge2 Re8 11. O-O Ne4 12. Bxe7 Qxe7 13. Rae1 Ndf6 14. f3 Nd6 15. e4 dxe4 16. fxe4
+#6 🎯 Marshall Strike
+1. d4 d5 2. c4 e6 3. Nc3 c6 4. e4 Nf6 5. cxd5 exd5 6. e5
+#7 🎯 Bishop Hunt
+1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. cxd5 exd5 5. Bg5 Be7 6. e3 O-O 7. Bd3 h6 8. Bh4 c6 9. Nge2 Bg4 10. f3 Bh5 11. Nf4
+#8 🎯 Castle Lock
+1. d4 d5 2. c4 e6 3. Nc3 Bb4 4. e3 Bxc3+ 5. bxc3 Nf6 6. Ba3
+#9 🎯 Coordinated Assault
+1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. cxd5 exd5 5. Bg5 Be7 6. e3 O-O 7. Bd3 c6 8. Qc2 h6 9. Bh4 Nbd7 10. Nge2 Re8 11. O-O Nf8 12. f3 Ne6 13. Rad1 c5 14. dxc5
+#10 🎯 QGA Shift
+1. d4 d5 2. c4 e6 3. Nc3 dxc4 4. e4
+#11 🎯 Weakness Target
+1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. cxd5 exd5 5. Bg5 Be7 6. e3 O-O 7. Bd3 c6 8. Qc2 h6 9. Bh4 Nbd7 10. Nge2 Re8 11. O-O Ne4 12. Bxe7 Qxe7 13. Rae1 f5 14. f3 Nxc3 15. Nxc3
+#12 🎯 Quiet Capture
+1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. cxd5 exd5 5. Bg5 Be7 6. e3 O-O 7. Bd3 c5 8. dxc5 Bxc5 9. Nge2
+#13 🎯 Center Seizure
+1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. cxd5 Nxd5 5. e4 Nxc3 6. bxc3 Be7 7. Nf3 O-O 8. Bd3 c5 9. O-O cxd4 10. cxd4 Nc6 11. Bb2
+#14 🎯 Marshall Exchange
+1. d4 d5 2. c4 e6 3. Nc3 c6 4. e4 dxe4 5. Nxe4 Nf6 6. Nxf6+ Qxf6 7. Nf3 Bb4+ 8. Bd2 Bxd2+ 9. Qxd2
+#15 🎯 Active Gambit
+1. d4 d5 2. c4 e6 3. Nc3 c6 4. e4 dxe4 5. Nxe4 Bb4+ 6. Bd2 Qxd4 7. Bxb4 Qxe4+ 8. Be2 Qxg2 9. Bf3 Qg5 10. Ne2
+#16 🎯 Queen's Bite
+1. d4 d5 2. c4 e6 3. Nc3 c5 4. cxd5 cxd4 5. Qa4+ Bd7 6. Qxd4 exd5 7. Qxd5 Nf6 8. Qb3
+#17 🎯 C-File Crush
+1. d4 d5 2. c4 e6 3. Nc3 c5 4. cxd5 exd5 5. Nf3 Nc6 6. dxc5 d4 7. Na4 Bxc5 8. Nxc5 Qa5+ 9. Bd2 Qxc5 10. Rc1
+#18 🎯 Solid Center
+1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. cxd5 Nxd5 5. e4 Nxc3 6. bxc3 c5 7. Nf3 cxd4 8. cxd4 Bb4+ 9. Bd2 Bxd2+ 10. Qxd2 O-O 11. Bc4 Nd7 12. O-O b6 13. Rfe1 Bb7 14. Rad1 Rc8 15. Bb3
+#19 🎯 Nimzo Shift
+1. d4 d5 2. c4 e6 3. Nc3 Bb4 4. e3 Nf6 5. a3 Bxc3+ 6. bxc3 O-O 7. cxd5 exd5 8. Bd3 c5 9. Ne2 Nc6 10. O-O
+#20 🎯 Knight Prod
+1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. cxd5 exd5 5. Bg5 Be7 6. e3 O-O 7. Bd3 c6 8. Qc2 h6 9. Bh4 Nbd7 10. Nge2 Re8 11. O-O Ne4 12. Bxe7 Qxe7 13. Rae1 Ndf6 14. f3 Nxc3 15. Nxc3`,
+  "Caro": `# Caro-Kann | Chessreps Opening Trainer
+#1 🎯 Resilient Core
+1. e4 c6 2. d4 d5 3. e5 c5 4. dxc5 Nc6 5. a3 e6 6. b4 a5 7. b5 Nxe5 8. Bb2 f6 9. Bxe5 fxe5 10. Qh5+ g6 11. Qxe5 Nf6
+#2 🎯 King Hunt
+1. e4 c6 2. d4 d5 3. e5 c5 4. dxc5 Nc6 5. f4 Nh6 6. c3 e6 7. b4 a5 8. Bb5 Bd7 9. Bxc6 Bxc6
+#3 🎯 d4 Heist
+1. e4 c6 2. d4 d5 3. e5 c5 4. c3 Nc6 5. Nf3 cxd4 6. cxd4 Bg4 7. h3 Bxf3 8. Qxf3 Nxd4 9. Qd3 Nc6
+#4 🎯 Structure Break
+1. e4 c6 2. d4 d5 3. e5 c5 4. c3 Nc6 5. Nf3 cxd4 6. cxd4 Bg4 7. h3 Bxf3 8. gxf3 Qb6
+#5 🎯 Pawn Wedge
+1. e4 c6 2. d4 d5 3. e5 c5 4. c3 Nc6 5. f4 cxd4 6. cxd4 h5 7. Nf3 Bg4 8. Be2 e6 9. O-O Qb6
+#6 🎯 Exchange Sac
+1. e4 c6 2. d4 d5 3. e5 c5 4. dxc5 Nc6 5. a3 e6 6. b4 a5 7. Bb2 axb4 8. axb4 Rxa1 9. Bxa1 Nxb4
+#7 🎯 Queen's Fork
+1. e4 c6 2. d4 d5 3. exd5 cxd5 4. c4 Nf6 5. Nc3 g6 6. Nf3 Bg7 7. cxd5 Nxd5 8. Bc4 Nxc3 9. bxc3 Qc7
+#8 🎯 Pawn Snatcher
+1. e4 c6 2. d4 d5 3. e5 c5 4. c3 Nc6 5. Nf3 cxd4 6. cxd4 Bg4 7. Be2 e6 8. h3 Bxf3 9. Bxf3 Qb6 10. Be3 Qxb2 11. Nd2 Bb4
+#9 🎯 Pin Counter
+1. e4 c6 2. d4 d5 3. e5 c5 4. c3 Nc6 5. Bb5 Qa5 6. Bxc6+ bxc6 7. Bd2 Qb6
+#10 🎯 Kingside Focus
+1. e4 c6 2. d4 d5 3. Nc3 dxe4 4. Nxe4 Nf6 5. Ng3 h5 6. h4 Bg4 7. Be2 e6 8. Nf3 Bd6
+#11 🎯 d4 Pressure
+1. e4 c6 2. d4 d5 3. e5 c5 4. c3 Nc6 5. Nf3 cxd4 6. cxd4 Bg4 7. Be2 e6 8. O-O Nge7 9. Nc3 Nf5 10. Be3 Be7 11. a3 O-O
+#12 🎯 h-Pawn Rush
+1. e4 c6 2. d4 d5 3. Nc3 dxe4 4. Nxe4 Nf6 5. Ng3 h5 6. Nf3 h4 7. Ne2 Bg4
+#13 🎯 Open Gamble
+1. e4 c6 2. d4 d5 3. e5 c5 4. c3 Nc6 5. Be3 Nh6 6. Bxh6 gxh6 7. Nf3 Qb6
+#14 🎯 Center Strike
+1. e4 c6 2. d4 d5 3. exd5 cxd5 4. Bd3 Nc6 5. c3 Nf6 6. h3 e5 7. dxe5 Nxe5
+#15 🎯 Solid Panov
+1. e4 c6 2. d4 d5 3. exd5 cxd5 4. c4 Nf6 5. cxd5 Nxd5 6. Nc3 Nc6 7. Nf3 Bf5 8. Bc4 e6
+#16 🎯 Mainline Caro
+1. e4 c6 2. d4 d5 3. exd5 cxd5 4. Bd3 Nc6 5. c3 Nf6 6. Bf4 Bg4 7. Qb3 Qd7 8. Nd2 e6 9. Ngf3 Bd6 10. Bxd6 Qxd6 11. O-O O-O
+#17 🎯 File Opener
+1. e4 c6 2. d4 d5 3. e5 c5 4. dxc5 Nc6 5. Bb5 e6 6. b4 a5 7. c3 axb4 8. cxb4 Bd7 9. Bxc6 Bxc6
+#18 🎯 Knight Anchor
+1. e4 c6 2. d4 d5 3. Nc3 dxe4 4. Nxe4 Nf6 5. Nxf6+ exf6 6. c3 Bd6 7. Bd3 O-O 8. Qc2 Re8+ 9. Ne2 h5 10. Be3 Nd7 11. O-O-O Nf8
+#19 🎯 Pin & Battery
+1. e4 c6 2. d4 d5 3. exd5 cxd5 4. Nf3 Nf6 5. Bd3 Bg4 6. O-O Nc6 7. c3 e6 8. h3 Bh5 9. Bg5 Bd6 10. Nbd2 h6 11. Bh4 Qc7
+#20 📖 Chaos Gambit
+1. e4 c6 2. d4 d5 3. e5 c5 4. dxc5 Nc6 5. f4 Nh6 6. Nf3 Bg4 7. Be3 Nf5 8. Bf2 g5 9. fxg5 e6
+#21 📖 Active Check
+1. e4 c6 2. d4 d5 3. e5 c5 4. dxc5 Nc6 5. Nf3 Bg4 6. Bb5 Qa5+ 7. Nc3 e6
+#22 📖 Future File
+1. e4 c6 2. d4 d5 3. exd5 cxd5 4. Nf3 Nf6 5. Bd3 Bg4 6. O-O Nc6 7. c3 e6 8. Bg5 Be7 9. Nbd2 O-O 10. Qc2 h6 11. Bh4 Rc8
+#23 📖 d4 Siege
+1. e4 c6 2. d4 d5 3. e5 c5 4. c3 Nc6 5. Nf3 cxd4 6. cxd4 Bg4 7. Be2 e6 8. O-O Nge7 9. Nc3 Nf5 10. Be3 Be7 11. h3 Bxf3 12. Bxf3 O-O 13. Rc1 f6 14. exf6 Bxf6
+#24 📖 Queen Rampage
+1. e4 c6 2. d4 d5 3. e5 c5 4. dxc5 Nc6 5. Bb5 e6 6. Bxc6+ bxc6 7. b4 a5 8. c3 axb4 9. cxb4 Qh4 10. Bd2 Qe4+ 11. Qe2 Qxg2 12. Qf3 Qg6
+#25 📖 Bishop Target
+1. e4 c6 2. d4 d5 3. e5 c5 4. dxc5 Nc6 5. f4 Nh6 6. Nf3 Bg4 7. Be2 e6 8. Be3 Nf5
+#26 🎯 Knight Journey
+1. e4 c6 2. d4 d5 3. Nc3 dxe4 4. Nxe4 Nf6 5. Nxf6+ exf6 6. Nf3 Bd6 7. Bd3 O-O 8. O-O Re8 9. h3 Nd7 10. c3 Nf8
+#27 📖 Kingside March
+1. e4 c6 2. d4 d5 3. Nc3 dxe4 4. Nxe4 Nf6 5. Nxf6+ exf6 6. c3 Bd6 7. Bd3 O-O 8. Qc2 Re8+ 9. Ne2 h5 10. O-O h4 11. h3 Nd7 12. Be3 Nf8
+#28 📖 Knight Hop
+1. e4 c6 2. d4 d5 3. e5 c5 4. dxc5 Nc6 5. Bb5 e6 6. Be3 Ne7 7. c3 Nf5 8. Bd4 Bd7`,
+};
+
+function loadBuiltin(name) {
+  var text = BUILTIN_REPS[name];
+  if (text) loadGames(text, name);
 }
 
 // ── File input ───────────────────────────────────────────────────
