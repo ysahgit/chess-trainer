@@ -668,11 +668,62 @@ function flipBoard(){
   board.setOrientation(board.getOrientation()===_COLOR.white?_COLOR.black:_COLOR.white);
   updateStrip();
 }
+function launchConfetti() {
+  var boardEl = document.getElementById("board-container");
+  var rect = boardEl.getBoundingClientRect();
+
+  var canvas = document.createElement("canvas");
+  canvas.style.cssText = "position:fixed;pointer-events:none;z-index:9999;"
+    + "left:" + rect.left + "px;top:" + rect.top + "px;"
+    + "width:" + rect.width + "px;height:" + rect.height + "px;";
+  document.body.appendChild(canvas);
+  var ctx = canvas.getContext("2d");
+  canvas.width = rect.width;
+  canvas.height = rect.height;
+
+  var pieces = [];
+  var colors = ["#72bf50","#f0c040","#4a8fd4","#e05040","#a855f7","#f97316"];
+  for (var i = 0; i < 100; i++) {
+    pieces.push({
+      x: rect.width * 0.2 + Math.random() * rect.width * 0.6,
+      y: rect.height * 0.3 + Math.random() * rect.height * 0.2,
+      w: 16 + Math.random() * 16,
+      h: 8 + Math.random() * 8,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      rot: Math.random() * Math.PI * 2,
+      vx: (Math.random() - 0.5) * 6,
+      vy: -3 - Math.random() * 5,
+      vr: (Math.random() - 0.5) * 0.25,
+    });
+  }
+
+  var start = null;
+  function draw(ts) {
+    if (!start) start = ts;
+    var elapsed = ts - start;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    pieces.forEach(function(p) {
+      p.x += p.vx; p.y += p.vy; p.rot += p.vr; p.vy += 0.15;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = Math.max(0, 1 - elapsed / 2500);
+      ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+      ctx.restore();
+    });
+    if (elapsed < 2600) requestAnimationFrame(draw);
+    else canvas.remove();
+  }
+  requestAnimationFrame(draw);
+}
+
 function finishLine(){
   playSound("done");
   if(board) board.disableMoveInput();
   document.getElementById("btn-hint").disabled=true;
   document.getElementById("btn-skip").disabled=true;
+  launchConfetti();
   if(S.mode==="drill"){
     S.drillDone.add(S.gameIdx); updateDrillFooter();
     if(S.drillQueue.length>0){
