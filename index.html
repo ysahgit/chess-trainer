@@ -173,6 +173,15 @@ html,body{height:100%;width:100%;background:var(--bg2);color:var(--text);
       <textarea id="pgn-paste" placeholder="…or paste PGN here"></textarea>
       <div id="pgn-status"></div>
     </div>
+    <div class="sb-hdr">Repertoires</div>
+    <div class="rep-grid">
+      <button class="rep-btn" onclick="loadBuiltin('Jobava')">Jobava</button>
+      <button class="rep-btn" onclick="loadBuiltin('Jobava-S')">Jobava-S</button>
+      <button class="rep-btn" onclick="loadBuiltin('Scandi Nf6')">Scandi Nf6</button>
+      <button class="rep-btn" onclick="loadBuiltin('QGA')">QGA</button>
+      <button class="rep-btn" onclick="loadBuiltin('QGD')">QGD</button>
+      <button class="rep-btn" onclick="loadBuiltin('Caro')">Caro</button>
+    </div>
     <div class="sb-hdr">Play as</div>
     <div id="color-pick">
       <div class="cbtn sw" id="cbtn-w" onclick="setColor('white')">♔ White</div>
