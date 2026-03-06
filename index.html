@@ -445,24 +445,20 @@ function loadGames(text, filename) {
 }
 
 // ── Sounds ───────────────────────────────────────────────────────
-var _ac = null;
-function beep(freq, dur, type, vol) {
-  try {
-    if (!_ac) _ac = new (window.AudioContext||window.webkitAudioContext)();
-    if (_ac.state==="suspended") _ac.resume();
-    var o=_ac.createOscillator(), g=_ac.createGain();
-    o.connect(g); g.connect(_ac.destination);
-    o.type=type||"sine"; o.frequency.value=freq;
-    g.gain.setValueAtTime(vol||0.14, _ac.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001, _ac.currentTime+dur);
-    o.start(); o.stop(_ac.currentTime+dur);
-  } catch(e){}
+var _sounds = {};
+function getSound(name) {
+  if (!_sounds[name]) {
+    _sounds[name] = new Audio("sounds/" + name + ".ogg");
+    _sounds[name].preload = "auto";
+  }
+  return _sounds[name];
 }
 function playSound(t) {
-  if(t==="move") beep(440,.08);
-  else if(t==="wrong"){beep(180,.12,"sawtooth");setTimeout(function(){beep(160,.18,"sawtooth")},80);}
-  else if(t==="done"){beep(523,.1);setTimeout(function(){beep(659,.1)},110);setTimeout(function(){beep(784,.18)},220);}
-  else if(t==="capture") beep(320,.1,"triangle");
+  try {
+    var s = getSound(t);
+    s.currentTime = 0;
+    s.play().catch(function(){});
+  } catch(e){}
 }
 
 // ── Board sizing ─────────────────────────────────────────────────
