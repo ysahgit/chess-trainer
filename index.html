@@ -146,9 +146,11 @@ html,body{height:100%;width:100%;background:var(--bg2);color:var(--text);
   #main{order:1;height:100%;width:100%;overflow:hidden}
   #trainer{height:100%;justify-content:flex-start;gap:4px;padding:4px 6px}
   #board-container{flex-shrink:0!important}
-  #bot-strip,#ctrl-row{flex-shrink:0!important;width:100%!important}
+  #bot-strip,#ctrl-row,#tablet-controls{flex-shrink:0!important;width:100%!important}
   /* hide desktop ctrl-row on tablet */
   #ctrl-row{display:none!important}
+  /* hide hint/skip from bot-strip on tablet to avoid duplication */
+  #btn-hint,#btn-skip{display:none}
   /* tablet top bar */
   #tablet-top{display:flex;gap:4px;flex-wrap:wrap;align-items:center;width:100%;flex-shrink:0}
   #tablet-color{display:flex;gap:4px;flex-shrink:0}
@@ -305,9 +307,18 @@ html,body{height:100%;width:100%;background:var(--bg2);color:var(--text);
     </div>
     <div id="trainer">
       <div id="board-container"></div>
-      <div id="tablet-color-inline" style="display:none;width:100%;gap:4px">
-        <div class="cbtn sw" id="tcbtn-w2" onclick="setColor('white');syncColorBtns()" style="flex:1">♔ White</div>
-        <div class="cbtn"    id="tcbtn-b2" onclick="setColor('black');syncColorBtns()" style="flex:1">♚ Black</div>
+
+      <!-- Tablet compact controls (mobile only) -->
+      <div id="tablet-controls" style="display:none;width:100%;gap:4px;flex-wrap:nowrap">
+        <div class="cbtn sw" id="tcbtn-w2" onclick="setColor('white');syncColorBtns()" style="flex:1;padding:5px 3px;font-size:10px">♔</div>
+        <div class="cbtn"    id="tcbtn-b2" onclick="setColor('black');syncColorBtns()" style="flex:1;padding:5px 3px;font-size:10px">♚</div>
+        <div style="width:1px;background:var(--border2);flex-shrink:0"></div>
+        <div class="mbtn active-practice" id="tcmbtn-practice" onclick="setMode('practice');syncModeBtns()" style="flex:1;padding:5px 3px;font-size:10px">📖</div>
+        <div class="mbtn"                 id="tcmbtn-drill"    onclick="setMode('drill');syncModeBtns()"    style="flex:1;padding:5px 3px;font-size:10px">🎯</div>
+        <div style="width:1px;background:var(--border2);flex-shrink:0"></div>
+        <button class="btn" onclick="nextLine()" style="flex:1;padding:5px 3px;font-size:10px;justify-content:center">›</button>
+        <button class="sb-btn" id="tbtn-hint" onclick="showHint()" disabled style="flex:1;padding:5px 3px;font-size:10px">💡</button>
+        <button class="sb-btn" id="tbtn-skip" onclick="doSkip()"   disabled style="flex:1;padding:5px 3px;font-size:10px">⏭</button>
       </div>
       <div class="pstrip" id="bot-strip">
         <div class="ps-ico" id="bot-ico"></div>
@@ -1075,6 +1086,8 @@ function selectGame(idx){
   document.getElementById("btn-next-done-wrap").style.display="none";
   document.getElementById("btn-hint").disabled=false;
   document.getElementById("btn-skip").disabled=false;
+  var th=document.getElementById("tbtn-hint"); if(th) th.disabled=false;
+  var ts=document.getElementById("tbtn-skip"); if(ts) ts.disabled=false;
   if(d) setCard("drill","🎯","Line "+(S.drillDone.size+1)+" of "+S.games.length);
   else  setCard("idle","♟","Your turn");
   if(S.playerColor==="black") setTimeout(runOpponent,400);
@@ -1205,6 +1218,8 @@ function finishLine(){
   if(board) board.disableMoveInput();
   document.getElementById("btn-hint").disabled=true;
   document.getElementById("btn-skip").disabled=true;
+  var th=document.getElementById("tbtn-hint"); if(th) th.disabled=true;
+  var ts=document.getElementById("tbtn-skip"); if(ts) ts.disabled=true;
   launchConfetti();
   if(S.mode==="drill"){
     S.drillDone.add(S.gameIdx); updateDrillFooter();
@@ -1279,10 +1294,12 @@ function syncColorBtns() {
 }
 function syncModeBtns() {
   var d = S.mode === "drill";
-  document.getElementById("mbtn-practice").className = "mbtn" + (!d?" active-practice":"");
-  document.getElementById("mbtn-drill").className    = "mbtn" + (d?" active-drill":"");
-  document.getElementById("dmbtn-practice").className = "mbtn" + (!d?" active-practice":"");
-  document.getElementById("dmbtn-drill").className    = "mbtn" + (d?" active-drill":"");
+  ["mbtn-practice","dmbtn-practice","tcmbtn-practice"].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.className="mbtn"+(!d?" active-practice":"");
+  });
+  ["mbtn-drill","dmbtn-drill","tcmbtn-drill"].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.className="mbtn"+(d?" active-drill":"");
+  });
 }
 function syncDrawerScores() {
   var dsc = document.getElementById("dsc-c"); if(dsc) dsc.textContent = S.scoreC;
@@ -1298,7 +1315,7 @@ function pasteLoadDrawer() {
 }
 // Show tablet color picker inside trainer on mobile
 function showTabletColor() {
-  var el = document.getElementById("tablet-color-inline");
+  var el = document.getElementById("tablet-controls");
   if (el && window.innerWidth <= 700) el.style.display = "flex";
 }
 
