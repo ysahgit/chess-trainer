@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -186,8 +185,8 @@ html,body{height:100%;width:100%;background:var(--bg2);color:var(--text);
       <div><div class="sb-logo-name">Practice</div><div class="sb-logo-sub">Repertoire Trainer</div></div>
     </div>
     <div class="sb-scores">
-      <div class="sbs c"><span class="v" id="sc-c">0</span><span class="l">Correct</span></div>
-      <div class="sbs w"><span class="v" id="sc-w">0</span><span class="l">Wrong</span></div>
+      <div class="sbs c"><span class="v" id="sc-c">0</span><span class="l">Lines</span></div>
+      <div class="sbs w"><span class="v" id="sc-w">0</span><span class="l">Errors</span></div>
       <div class="sbs"><span class="v" id="sc-pct" style="color:var(--text)">—</span><span class="l">Accuracy</span></div>
     </div>
     <div class="sb-hdr">Load PGN</div>
@@ -268,8 +267,8 @@ html,body{height:100%;width:100%;background:var(--bg2);color:var(--text);
       </div>
       <!-- Scores -->
       <div class="sb-scores" style="border-radius:8px;overflow:hidden;margin-bottom:8px;border:1px solid var(--border)">
-        <div class="sbs c"><span class="v" id="dsc-c">0</span><span class="l">Correct</span></div>
-        <div class="sbs w"><span class="v" id="dsc-w">0</span><span class="l">Wrong</span></div>
+        <div class="sbs c"><span class="v" id="dsc-c">0</span><span class="l">Lines</span></div>
+        <div class="sbs w"><span class="v" id="dsc-w">0</span><span class="l">Errors</span></div>
         <div class="sbs"><span class="v" id="dsc-pct" style="color:var(--text)">—</span><span class="l">Accuracy</span></div>
       </div>
       <!-- Mode -->
@@ -926,7 +925,7 @@ var INIT_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 var chessEngine = null;
 var S = {
   games:[], gameIdx:-1, moves:[], moveIdx:0, fen:INIT_FEN,
-  playerColor:"white", completed:new Set(), busy:false, scoreC:0, scoreW:0,
+  playerColor:"white", completed:new Set(), busy:false, scoreC:0, scoreW:0, lineHadError:false,
   mode:"practice", drillQueue:[], drillDone:new Set(),
   streak:0, bestStreak:0
 };
@@ -1030,8 +1029,7 @@ function doValidate(from,to,promo,prevFen){
   if(ok){
     chessEngine.move({from:from,to:to,promotion:promo.toLowerCase()||undefined});
     S.fen=chessEngine.fen(); S.moveIdx++;
-    document.getElementById("sc-c").textContent=++S.scoreC;
-    updateAccuracy(); playSound("move");
+    playSound("move");
     setCard("correct","✓","Correct!"); showAnnotation(exp.comment,"You");
     board.setPosition(S.fen,true); updateProgress(); updateMovelist();
     S.busy=false;
@@ -1039,8 +1037,8 @@ function doValidate(from,to,promo,prevFen){
     setTimeout(function(){setCard("idle","♟","Your turn");runOpponent();},500);
   } else {
     // Return false to cm-chessboard so it cancels the move animation itself
-    document.getElementById("sc-w").textContent=++S.scoreW;
-    updateAccuracy(); playSound("wrong");
+    S.lineHadError=true;
+    playSound("wrong");
     setCard("wrong","✗","Wrong — try again!");
     if(S.mode==="drill") updateStreak(false);
     S.busy=false;
@@ -1073,7 +1071,7 @@ function runOpponent(){
 function selectGame(idx){
   S.gameIdx=idx; var game=S.games[idx];
   S.moves=game.moves; S.moveIdx=0;
-  chessEngine=newChess(); S.fen=chessEngine.fen(); S.busy=false;
+  chessEngine=newChess(); S.fen=chessEngine.fen(); S.busy=false; S.lineHadError=false;
   document.getElementById("welcome").style.display="none";
   document.getElementById("trainer").style.display="flex";
   showTabletColor();
@@ -1227,6 +1225,12 @@ function finishLine(){
   document.getElementById("btn-skip").disabled=true;
   var th=document.getElementById("tbtn-hint"); if(th) th.disabled=true;
   var ts=document.getElementById("tbtn-skip"); if(ts) ts.disabled=true;
+  if (S.lineHadError) {
+    S.scoreW++;
+  } else {
+    S.scoreC++;
+  }
+  updateAccuracy();
   launchConfetti();
   if(S.mode==="drill"){
     S.drillDone.add(S.gameIdx); updateDrillFooter();
@@ -1258,7 +1262,13 @@ function showAnnotation(text,who){
 }
 function updateAccuracy(){
   var t=S.scoreC+S.scoreW;
-  document.getElementById("sc-pct").textContent=t>0?Math.round(S.scoreC/t*100)+"%":"—";
+  var pct=t>0?Math.round(S.scoreC/t*100)+"%":"—";
+  document.getElementById("sc-c").textContent=S.scoreC;
+  document.getElementById("sc-w").textContent=S.scoreW;
+  document.getElementById("sc-pct").textContent=pct;
+  var dc=document.getElementById("dsc-c"); if(dc) dc.textContent=S.scoreC;
+  var dw=document.getElementById("dsc-w"); if(dw) dw.textContent=S.scoreW;
+  var dp=document.getElementById("dsc-pct"); if(dp) dp.textContent=pct;
 }
 function updateProgress(){
   var t=S.moves.length, d=Math.min(S.moveIdx,t);
@@ -1323,12 +1333,7 @@ function syncModeBtns() {
     var el=document.getElementById(id); if(el) el.className="mbtn"+(d?" active-drill":"");
   });
 }
-function syncDrawerScores() {
-  var dsc = document.getElementById("dsc-c"); if(dsc) dsc.textContent = S.scoreC;
-  var dsw = document.getElementById("dsc-w"); if(dsw) dsw.textContent = S.scoreW;
-  var dsp = document.getElementById("dsc-pct");
-  if(dsp){ var t=S.scoreC+S.scoreW; dsp.textContent=t>0?Math.round(S.scoreC/t*100)+"%":"—"; }
-}
+function syncDrawerScores() { updateAccuracy(); }
 function pasteLoadDrawer() {
   var text = document.getElementById("pgn-paste-drawer").value.trim();
   if (!text) return;
