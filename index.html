@@ -141,8 +141,12 @@ html,body{height:100%;width:100%;background:var(--bg2);color:var(--text);
 .btn:disabled{opacity:.35;pointer-events:none}
 @media(max-width:700px){
   #app{flex-direction:column;padding:6px;gap:6px;overflow-y:auto;height:auto;min-height:100vh}
-  #sidebar{width:100%;order:2}#main{order:1;height:auto}
-  #trainer{height:auto;justify-content:flex-start}html,body{overflow:auto}
+  #sidebar{width:100%;order:2}
+  #main{order:1;height:auto;flex-shrink:0}
+  #trainer{height:auto;justify-content:flex-start;flex-shrink:0}
+  #board-container{flex-shrink:0!important}
+  #bot-strip,#ctrl-row{flex-shrink:0!important}
+  html,body{overflow:auto}
 }
 
 .rep-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;padding:6px 12px;border-bottom:1px solid var(--border);flex-shrink:0}
@@ -1163,8 +1167,7 @@ document.addEventListener("keydown",function(e){
   if(e.key==="f"||e.key==="F") flipBoard();
   if(e.key==="d"||e.key==="D") setMode(S.mode==="drill"?"practice":"drill");
 });
-new ResizeObserver(applyBoardSize).observe(document.getElementById("app"));
-window.addEventListener("resize",applyBoardSize);
+window.addEventListener("resize", applyBoardSize);
 </script>
 
 <!-- cm-chessboard needs ES module — runs after plain script, exposes globals -->
