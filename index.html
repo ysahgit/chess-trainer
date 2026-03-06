@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -326,6 +327,7 @@ html,body{height:100%;width:100%;background:var(--bg2);color:var(--text);
         <span class="ps-tag"  id="bot-tag"></span>
         <span id="status-icon">♟</span>
         <span id="status-msg">—</span>
+        <span id="streak-display" style="display:none;font-size:11px;font-weight:700;color:var(--gold-lt);white-space:nowrap">🔥 <span id="streak-val">0</span> best: <span id="best-val">0</span></span>
         <button class="sb-btn" id="btn-hint" onclick="showHint()" disabled>💡 Hint</button>
         <button class="sb-btn" id="btn-skip" onclick="doSkip()" disabled>⏭ Skip</button>
       </div>
@@ -925,7 +927,8 @@ var chessEngine = null;
 var S = {
   games:[], gameIdx:-1, moves:[], moveIdx:0, fen:INIT_FEN,
   playerColor:"white", completed:new Set(), busy:false, scoreC:0, scoreW:0,
-  mode:"practice", drillQueue:[], drillDone:new Set()
+  mode:"practice", drillQueue:[], drillDone:new Set(),
+  streak:0, bestStreak:0
 };
 
 function loadGames(text, filename) {
@@ -1039,6 +1042,7 @@ function doValidate(from,to,promo,prevFen){
     document.getElementById("sc-w").textContent=++S.scoreW;
     updateAccuracy(); playSound("wrong");
     setCard("wrong","✗","Wrong — try again!");
+    if(S.mode==="drill") updateStreak(false);
     S.busy=false;
     // Snap back by restoring position after animation frame
     requestAnimationFrame(function(){
@@ -1095,6 +1099,9 @@ function selectGame(idx){
 
 function setMode(mode){
   S.mode=mode;
+  S.streak=0;
+  var el=document.getElementById("streak-display");
+  if(el) el.style.display=mode==="drill"?"inline-flex":"none";
   document.getElementById("mbtn-practice").className="mbtn"+(mode==="practice"?" active-practice":"");
   document.getElementById("mbtn-drill").className   ="mbtn"+(mode==="drill"   ?" active-drill"   :"");
   if(mode==="drill") drillReset();
@@ -1223,6 +1230,7 @@ function finishLine(){
   launchConfetti();
   if(S.mode==="drill"){
     S.drillDone.add(S.gameIdx); updateDrillFooter();
+    updateStreak(true);
     if(S.drillQueue.length>0){
       setCard("done","★","Line done! Moving to next…");
       var nx=S.drillQueue.shift();
@@ -1271,6 +1279,20 @@ function updateMovelist(){
   var cur=el.querySelector(".current"); if(cur) cur.scrollIntoView({block:"nearest"});
   var dl=document.getElementById("movelist-drawer"); if(dl){ dl.innerHTML=html; var dc=dl.querySelector(".current"); if(dc) dc.scrollIntoView({block:"nearest"}); }
 }
+function updateStreak(success) {
+  if (S.mode !== "drill") return;
+  if (success) {
+    S.streak++;
+    if (S.streak > S.bestStreak) S.bestStreak = S.streak;
+  } else {
+    S.streak = 0;
+  }
+  var el = document.getElementById("streak-display");
+  if (el) el.style.display = S.mode === "drill" ? "inline-flex" : "none";
+  var sv = document.getElementById("streak-val"); if (sv) sv.textContent = S.streak;
+  var bv = document.getElementById("best-val"); if (bv) bv.textContent = S.bestStreak;
+}
+
 function openDrawer() {
   document.getElementById("drawer-overlay").classList.add("open");
   document.getElementById("drawer").classList.add("open");
