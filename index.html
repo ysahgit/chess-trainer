@@ -201,9 +201,9 @@ html,body{height:100%;width:100%;background:var(--bg2);color:var(--text);
     </div>
     <div class="sb-hdr">Repertoires</div>
     <div class="rep-grid">
-      <button class="rep-btn" onclick="loadBuiltin('Jobava')">Jobava</button>
-      <button class="rep-btn" onclick="loadBuiltin('Jobava-S')">Jobava-S</button>
-      <button class="rep-btn" onclick="loadBuiltin('Scandi Nf6')">Scandi Nf6</button>
+      <button class="rep-btn" onclick="loadBuiltin('JBV')">JBV</button>
+      <button class="rep-btn" onclick="loadBuiltin('JSL')">JSL</button>
+      <button class="rep-btn" onclick="loadBuiltin('Scam')">Scam</button>
       <button class="rep-btn" onclick="loadBuiltin('QGA')">QGA</button>
       <button class="rep-btn" onclick="loadBuiltin('QGD')">QGD</button>
       <button class="rep-btn" onclick="loadBuiltin('Caro')">Caro</button>
@@ -241,9 +241,9 @@ html,body{height:100%;width:100%;background:var(--bg2);color:var(--text);
     <!-- Tablet top bar -->
     <div id="tablet-top">
       <div class="rep-grid" style="flex:1;display:grid;grid-template-columns:repeat(6,1fr);gap:3px">
-        <button class="rep-btn" onclick="loadBuiltin('Jobava')">Jobava</button>
-        <button class="rep-btn" onclick="loadBuiltin('Jobava-S')">Jobava-S</button>
-        <button class="rep-btn" onclick="loadBuiltin('Scandi Nf6')">Scandi</button>
+        <button class="rep-btn" onclick="loadBuiltin('JBV')">JBV</button>
+        <button class="rep-btn" onclick="loadBuiltin('JSL')">JSL</button>
+        <button class="rep-btn" onclick="loadBuiltin('Scam')">Scam</button>
         <button class="rep-btn" onclick="loadBuiltin('QGA')">QGA</button>
         <button class="rep-btn" onclick="loadBuiltin('QGD')">QGD</button>
         <button class="rep-btn" onclick="loadBuiltin('Caro')">Caro</button>
@@ -359,7 +359,7 @@ function setPgnStatus(msg, ok) {
 }
 
 var BUILTIN_REPS = {
-  "Jobava": `#1 🎯 Queen Bait
+  "JBV": `#1 🎯 Queen Bait
 1. d4 d5 2. Nc3 Nf6 3. Bf4 Nc6 4. Nb5 e5 5. Bxe5 Nxe5 6. dxe5 Ne4 7. Qxd5 Qxd5 8. Nxc7+ Kd7 9. Nxd5
 #2 🎯 Rook Heist
 1. d4 d5 2. Nc3 Nf6 3. Bf4 Nc6 4. Nb5 e6 5. Nxc7+ Kd7 6. Nxa8
@@ -411,7 +411,7 @@ var BUILTIN_REPS = {
 1. d4 d5 2. Nc3 Nf6 3. Bf4 e6 4. Nb5 Bd6 5. Nxd6+ cxd6 6. e3 Nc6 7. Nf3 O-O 8. c3 Re8 9. Be2 e5 10. Bg5
 #26 🎯 Safe Harbor
 1. d4 d5 2. Nc3 Nf6 3. Bf4 Bf5 4. f3 e6 5. g4 Bg6 6. h4 h6 7. e3 Bd6 8. Nh3 Nc6 9. Bd3 Bxd3 10. Qxd3 Bxf4 11. Nxf4 Qd6 12. O-O-O`,
-  "Jobava-S": `# Jobava London sidelines | Chessreps Opening Trainer
+  "JSL": `# Jobava London sidelines | Chessreps Opening Trainer
 #1 🎯 Unnamed Line
 1. d4 c5 2. d5 e6 3. e4 Nf6 4. Nc3
 #2 🎯 Unnamed Line
@@ -476,7 +476,7 @@ var BUILTIN_REPS = {
 1. d4 e5 2. dxe5 Nc6 3. Nf3 Qe7 4. Bf4 Qb4+ 5. Bd2 Qxb2 6. Nc3 Bb4 7. Rb1 Qa3 8. Nd5
 #32 🎯 Unnamed Line
 1. d4 g6 2. e4 Bg7 3. Nc3 d5 4. exd5 Nf6 5. Bc4`,
-  "Scandi Nf6": `# Modern scandinavian | Chessreps Opening Trainer
+  "Scam": `# Modern scandinavian | Chessreps Opening Trainer
 #1 🎯 Intro
 1. e4 d5 2. exd5 Nf6 3. Nc3 Nxd5 4. Nxd5 Qxd5 5. Nf3 Nc6 6. Be2 Bg4 7. O-O O-O-O 8. d3 e5
 #2 🎯 Scandinavian defence : Modern variation Line 2
