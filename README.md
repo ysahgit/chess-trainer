@@ -22,9 +22,9 @@ Six opening repertoires are included out of the box and load instantly:
 
 | Name | Description |
 |------|-------------|
-| Jobava | Jobava London — aggressive queen bait lines |
-| Jobava-S | Jobava London sidelines |
-| Scandi Nf6 | Modern Scandinavian Defence (28 lines) |
+| JBV | Jobava main lines |
+| JSL | Jobava sidelines |
+| Scam | Modern Scandinavian |
 | QGA | Queen's Gambit Accepted |
 | QGD | Queen's Gambit Declined |
 | Caro | Caro-Kann Defence |
