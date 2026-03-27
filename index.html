@@ -180,74 +180,95 @@ html,body{height:100%;width:100%;background:var(--bg2);color:var(--text);
 <body>
 <div id="app">
   <div id="sidebar"><div id="sidebar-card">
-    <div class="sb-logo">
-      <div class="sb-logo-icon">♟</div>
-      <div><div class="sb-logo-name">Practice</div><div class="sb-logo-sub">Repertoire Trainer</div></div>
-    </div>
-    <div class="sb-scores">
-      <div class="sbs c"><span class="v" id="sc-c">0</span><span class="l">Lines</span></div>
-      <div class="sbs w"><span class="v" id="sc-w">0</span><span class="l">Errors</span></div>
-      <div class="sbs"><span class="v" id="sc-pct" style="color:var(--text)">—</span><span class="l">Accuracy</span></div>
-    </div>
-    <div class="sb-hdr">Load PGN</div>
-    <div id="pgn-panel">
-      <input type="file" id="pgn-file-input" accept=".pgn,.txt" style="position:absolute;opacity:0;width:0;height:0">
-      <div class="pgn-row">
-        <label for="pgn-file-input" class="pgn-btn">📂 Open file</label>
-        <button class="pgn-btn" onclick="pasteLoad()">↳ Load text</button>
+    <!-- ── HOME state (visible before a rep is loaded) ── -->
+    <div id="sb-home">
+      <div class="sb-logo">
+        <div class="sb-logo-icon">♟</div>
+        <div><div class="sb-logo-name">Practice</div><div class="sb-logo-sub">Repertoire Trainer</div></div>
       </div>
-      <textarea id="pgn-paste" placeholder="…or paste PGN here"></textarea>
-      <div id="pgn-status"></div>
-    </div>
-    <div class="sb-hdr">Repertoires</div>
-    <div class="rep-grid">
-      <button class="rep-btn" onclick="loadBuiltin('JBV')">JBV</button>
-      <button class="rep-btn" onclick="loadBuiltin('JSL')">JSL</button>
-      <button class="rep-btn" onclick="loadBuiltin('Scam')">Scam</button>
-      <button class="rep-btn" onclick="loadBuiltin('QGA')">QGA</button>
-      <button class="rep-btn" onclick="loadBuiltin('QGD')">QGD</button>
-      <button class="rep-btn" onclick="loadBuiltin('Caro')">Caro</button>
-    </div>
-    <div class="sb-hdr">Play as</div>
-    <div id="color-pick">
-      <div class="cbtn sw" id="cbtn-w" onclick="setColor('white')">♔ White</div>
-      <div class="cbtn"    id="cbtn-b" onclick="setColor('black')">♚ Black</div>
-    </div>
-    <div class="sb-hdr">Mode</div>
-    <div id="mode-toggle">
-      <div class="mbtn active-practice" id="mbtn-practice" onclick="setMode('practice')">📖 Practice</div>
-      <div class="mbtn"                 id="mbtn-drill"    onclick="setMode('drill')">🎯 Drill</div>
-    </div>
-    <div id="status-card">
-      <div id="annotation">
-        <div id="annotation-icon">💬</div><div id="annotation-label"></div><div id="annotation-text"></div>
+      <div class="sb-scores">
+        <div class="sbs c"><span class="v" id="sc-c">0</span><span class="l">Lines</span></div>
+        <div class="sbs w"><span class="v" id="sc-w">0</span><span class="l">Errors</span></div>
+        <div class="sbs"><span class="v" id="sc-pct" style="color:var(--text)">—</span><span class="l">Accuracy</span></div>
       </div>
-      <div id="movelist-row"><div id="movelist-lbl">Moves</div><div id="movelist"></div></div>
-      <div id="prog-row">
-        <div id="prog-track"><div id="prog-fill" style="width:0%"></div></div>
-        <div id="prog-txt">0 / 0</div>
+      <div class="sb-hdr">Load PGN</div>
+      <div id="pgn-panel">
+        <input type="file" id="pgn-file-input" accept=".pgn,.txt" style="position:absolute;opacity:0;width:0;height:0">
+        <div class="pgn-row">
+          <label for="pgn-file-input" class="pgn-btn">📂 Open file</label>
+          <button class="pgn-btn" onclick="pasteLoad()">↳ Load text</button>
+        </div>
+        <textarea id="pgn-paste" placeholder="…or paste PGN here"></textarea>
+        <div id="pgn-status"></div>
+      </div>
+      <div class="sb-hdr">Repertoires</div>
+      <div class="rep-grid" id="rep-grid-sidebar"></div>
+      <div id="rep-edit-btn-wrap" style="display:none;padding:4px 12px 6px;border-bottom:1px solid var(--border);flex-shrink:0">
+        <button id="rep-edit-active-btn" onclick="openRepEdit(S.currentRep)" style="width:100%;padding:5px 8px;border-radius:7px;border:1px solid var(--border2);background:var(--panel2);color:var(--dim);cursor:pointer;font-size:11px;font-weight:600;text-align:left;display:flex;align-items:center;gap:6px">
+          <span>✏️</span><span id="rep-edit-active-label">Edit current repertoire</span>
+        </button>
+      </div>
+      <div class="sb-hdr">Play as</div>
+      <div id="color-pick">
+        <div class="cbtn sw" id="cbtn-w" onclick="setColor('white')">♔ White</div>
+        <div class="cbtn"    id="cbtn-b" onclick="setColor('black')">♚ Black</div>
       </div>
     </div>
-    <div id="btn-next-done-wrap">
-      <button class="btn g" style="width:100%;justify-content:center" onclick="nextAfterDone()">Next line →</button>
+
+    <!-- ── ACTIVE state (visible once a rep is loaded) ── -->
+    <div id="sb-active" style="display:none;flex-direction:column;height:100%;overflow:hidden">
+
+      <!-- top bar: back + rep name + edit -->
+      <div id="sb-active-topbar">
+        <button id="sb-back-btn" onclick="sbGoHome()" title="Back to repertoire list">←</button>
+        <span id="sb-active-repname">—</span>
+        <button id="sb-active-edit-btn" onclick="openRepEdit(S.currentRep)" title="Edit repertoire">✏️</button>
+      </div>
+
+      <!-- color only -->
+      <div id="sb-active-controls">
+        <div id="sb-active-color">
+          <button class="sac-btn" id="sacbtn-w" onclick="setColor('white');syncColorBtns()">♔ White</button>
+          <button class="sac-btn" id="sacbtn-b" onclick="setColor('black');syncColorBtns()">♚ Black</button>
+        </div>
+      </div>
+
+      <!-- scores -->
+      <div class="sb-scores" style="flex-shrink:0">
+        <div class="sbs c"><span class="v" id="sc-c">0</span><span class="l">Lines</span></div>
+        <div class="sbs w"><span class="v" id="sc-w">0</span><span class="l">Errors</span></div>
+        <div class="sbs"><span class="v" id="sc-pct" style="color:var(--text)">—</span><span class="l">Accuracy</span></div>
+      </div>
+
+      <!-- scrollable live content -->
+      <div id="sb-active-body">
+        <div id="annotation">
+          <div id="annotation-icon">💬</div><div id="annotation-label"></div><div id="annotation-text"></div>
+        </div>
+        <div id="movelist-row"><div id="movelist-lbl">Moves</div><div id="movelist"></div></div>
+        <div id="prog-row">
+          <div id="prog-track"><div id="prog-fill" style="width:0%"></div></div>
+          <div id="prog-txt">0 / 0</div>
+        </div>
+        <div id="drill-footer">
+          <span id="drill-footer-txt"></span>
+          <button id="drill-reset-btn" onclick="drillReset()">↺ Reset</button>
+        </div>
+        <div id="btn-next-done-wrap">
+          <button class="btn g" style="width:100%;justify-content:center" onclick="nextAfterDone()">Next line →</button>
+        </div>
+      </div>
+
     </div>
-    <div id="drill-footer">
-      <span id="drill-footer-txt"></span>
-      <button id="drill-reset-btn" onclick="drillReset()">↺ Reset</button>
-    </div>
+
+    <!-- status-card kept as a zero-size container so existing JS IDs resolve -->
+    <div id="status-card" style="display:none"></div>
   </div></div>
 
   <div id="main">
     <!-- Tablet top bar -->
     <div id="tablet-top">
-      <div class="rep-grid" style="flex:1;display:grid;grid-template-columns:repeat(6,1fr);gap:3px">
-        <button class="rep-btn" onclick="loadBuiltin('JBV')">JBV</button>
-        <button class="rep-btn" onclick="loadBuiltin('JSL')">JSL</button>
-        <button class="rep-btn" onclick="loadBuiltin('Scam')">Scam</button>
-        <button class="rep-btn" onclick="loadBuiltin('QGA')">QGA</button>
-        <button class="rep-btn" onclick="loadBuiltin('QGD')">QGD</button>
-        <button class="rep-btn" onclick="loadBuiltin('Caro')">Caro</button>
-      </div>
+      <div class="rep-grid" id="rep-grid-tablet" style="flex:1;display:grid;grid-template-columns:repeat(6,1fr);gap:3px"></div>
       <button class="btn" onclick="openDrawer()" style="flex-shrink:0;padding:6px 10px">⚙</button>
     </div>
 
@@ -270,12 +291,6 @@ html,body{height:100%;width:100%;background:var(--bg2);color:var(--text);
         <div class="sbs c"><span class="v" id="dsc-c">0</span><span class="l">Lines</span></div>
         <div class="sbs w"><span class="v" id="dsc-w">0</span><span class="l">Errors</span></div>
         <div class="sbs"><span class="v" id="dsc-pct" style="color:var(--text)">—</span><span class="l">Accuracy</span></div>
-      </div>
-      <!-- Mode -->
-      <div class="sb-hdr" style="margin-bottom:4px">Mode</div>
-      <div id="drawer-mode" style="display:flex;gap:5px;margin-bottom:8px">
-        <div class="mbtn active-practice" id="dmbtn-practice" onclick="setMode('practice');syncModeBtns()">📖 Practice</div>
-        <div class="mbtn" id="dmbtn-drill" onclick="setMode('drill');syncModeBtns()">🎯 Drill</div>
       </div>
       <!-- Load PGN -->
       <div class="sb-hdr" style="margin-bottom:4px">Load PGN</div>
@@ -312,9 +327,6 @@ html,body{height:100%;width:100%;background:var(--bg2);color:var(--text);
       <div id="tablet-controls" style="display:none;width:100%;gap:4px;flex-wrap:nowrap">
         <div class="cbtn sw" id="tcbtn-w2" onclick="setColor('white');syncColorBtns()" style="flex:1;padding:5px 3px;font-size:10px">♔</div>
         <div class="cbtn"    id="tcbtn-b2" onclick="setColor('black');syncColorBtns()" style="flex:1;padding:5px 3px;font-size:10px">♚</div>
-        <div style="width:1px;background:var(--border2);flex-shrink:0"></div>
-        <div class="mbtn active-practice" id="tcmbtn-practice" onclick="setMode('practice');syncModeBtns()" style="flex:1;padding:5px 3px;font-size:10px">📖</div>
-        <div class="mbtn"                 id="tcmbtn-drill"    onclick="setMode('drill');syncModeBtns()"    style="flex:1;padding:5px 3px;font-size:10px">🎯</div>
         <div style="width:1px;background:var(--border2);flex-shrink:0"></div>
         <button class="btn" onclick="nextLine()" style="flex:1;padding:5px 3px;font-size:10px;justify-content:center">›</button>
         <button class="sb-btn" id="tbtn-hint" onclick="showHint()" disabled style="flex:1;padding:5px 3px;font-size:10px">💡</button>
@@ -726,11 +738,6 @@ var BUILTIN_REPS = {
 1. e4 c6 2. d4 d5 3. e5 c5 4. dxc5 Nc6 5. Bb5 e6 6. Be3 Ne7 7. c3 Nf5 8. Bd4 Bd7`,
 };
 
-function loadBuiltin(name) {
-  var text = BUILTIN_REPS[name];
-  if (text) loadGames(text, name);
-}
-
 // ── File input ───────────────────────────────────────────────────
 document.getElementById("pgn-file-input-drawer") && document.getElementById("pgn-file-input-drawer").addEventListener("change", function(e) {
   var file = e.target.files[0]; if (!file) return;
@@ -927,7 +934,7 @@ var S = {
   games:[], gameIdx:-1, moves:[], moveIdx:0, fen:INIT_FEN,
   playerColor:"white", completed:new Set(), busy:false, scoreC:0, scoreW:0, lineHadError:false,
   mode:"practice", drillQueue:[], drillDone:new Set(),
-  streak:0, bestStreak:0
+  streak:0, bestStreak:0, currentRep:null
 };
 
 function loadGames(text, filename) {
@@ -936,9 +943,12 @@ function loadGames(text, filename) {
     var games = parsePgn(text);
     if (!games.length) { setPgnStatus("No valid moves found", false); return; }
     S.games = games; S.completed = new Set();
+    S.currentRep = (filename && BUILTIN_REPS[filename]) ? filename : null;
     setPgnStatus("✓ " + (filename||"") + " — " + games.length + " line(s)", true);
     drillReset();
     selectGame(0);
+    updateEditRepBtn();
+    if (S.currentRep) sbGoActive(S.currentRep);
   } catch(e) { setPgnStatus("Error: " + e.message, false); }
 }
 
@@ -1024,28 +1034,36 @@ function handleMoveInput(event) {
 }
 
 function doValidate(from,to,promo,prevFen){
+  // Check if the move is even legal before judging it as a wrong book move
+  var legalMoves=chessEngine.moves({square:from,verbose:true});
+  var isLegal=legalMoves.some(function(m){return m.to===to;});
+  if(!isLegal){
+    // Illegal chess move — snap back silently, no penalty
+    S.busy=false;
+    requestAnimationFrame(function(){ board.setPosition(prevFen,false); });
+    return;
+  }
   var exp=S.moves[S.moveIdx];
   var ok=exp&&from===exp.from&&to===exp.to&&(!exp.promo||promo===exp.promo);
   if(ok){
     chessEngine.move({from:from,to:to,promotion:promo.toLowerCase()||undefined});
     S.fen=chessEngine.fen(); S.moveIdx++;
     playSound("move");
-    setCard("correct","✓","Correct!"); showAnnotation(exp.comment,"You");
+    if(S.mode!=="drill") { setCard("correct","✓","Correct!"); showAnnotation(exp.comment,"You"); }
     board.setPosition(S.fen,true); updateProgress(); updateMovelist();
     S.busy=false;
     if(S.moveIdx>=S.moves.length){finishLine();return;}
-    setTimeout(function(){setCard("idle","♟","Your turn");runOpponent();},500);
+    if(S.mode==="drill") { runOpponent(); }
+    else { setTimeout(function(){setCard("idle","♟","Your turn");runOpponent();},500); }
   } else {
-    // Return false to cm-chessboard so it cancels the move animation itself
     S.lineHadError=true;
     playSound("wrong");
     setCard("wrong","✗","Wrong — try again!");
     if(S.mode==="drill") updateStreak(false);
     S.busy=false;
-    // Snap back by restoring position after animation frame
     requestAnimationFrame(function(){
       board.setPosition(prevFen,false);
-      setTimeout(function(){setCard("idle","♟","Your turn");},300);
+      if(S.mode!=="drill") setTimeout(function(){setCard("idle","♟","Your turn");},300);
     });
   }
 }
@@ -1053,7 +1071,9 @@ function doValidate(from,to,promo,prevFen){
 function runOpponent(){
   if(!board||S.moveIdx>=S.moves.length||S.busy) return;
   if((chessEngine.turn()==="w"?"white":"black")===S.playerColor) return;
-  S.busy=true; setCard("think","…","Thinking…");
+  S.busy=true;
+  var delay=S.mode==="drill"?0:380;
+  if(S.mode!=="drill") setCard("think","…","Thinking…");
   setTimeout(function(){
     var m=S.moves[S.moveIdx];
     chessEngine.move({from:m.from,to:m.to,promotion:m.promo.toLowerCase()||undefined});
@@ -1062,9 +1082,9 @@ function runOpponent(){
     board.setPosition(S.fen,true); updateProgress(); updateMovelist();
     S.busy=false;
     if(S.moveIdx>=S.moves.length){finishLine();return;}
-    if((chessEngine.turn()==="w"?"white":"black")!==S.playerColor) setTimeout(runOpponent,350);
-    else setCard("idle","♟","Your turn");
-  },380);
+    if((chessEngine.turn()==="w"?"white":"black")!==S.playerColor) setTimeout(runOpponent,S.mode==="drill"?0:350);
+    else if(S.mode!=="drill") setCard("idle","♟","Your turn");
+  },delay);
 }
 
 // ── Game selection ───────────────────────────────────────────────
@@ -1110,7 +1130,7 @@ function setMode(mode){
 function drillReset(){
   var a=[]; for(var i=0;i<S.games.length;i++) a.push(i);
   for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}
-  S.drillQueue=a; S.drillDone=new Set(); updateDrillFooter();
+  S.drillQueue=a; S.drillDone=new Set(); updateDrillFooter(); updateProgress();
 }
 function updateDrillFooter(){
   var f=document.getElementById("drill-footer");
@@ -1119,6 +1139,7 @@ function updateDrillFooter(){
   document.getElementById("drill-footer-txt").textContent=
     S.drillDone.size===S.games.length?"🏆 All "+S.games.length+" lines drilled!":
     "🎯 "+S.drillDone.size+" / "+S.games.length+" done";
+  updateProgress();
 }
 function setColor(c){
   S.playerColor=c;
@@ -1236,9 +1257,9 @@ function finishLine(){
     S.drillDone.add(S.gameIdx); updateDrillFooter();
     updateStreak(true);
     if(S.drillQueue.length>0){
-      setCard("done","★","Line done! Moving to next…");
+      setCard("done","★","Line done!");
       var nx=S.drillQueue.shift();
-      setTimeout(function(){selectGame(nx);},1200);
+      setTimeout(function(){selectGame(nx);},400);
     } else setCard("done","🏆","All lines drilled!");
   } else {
     S.completed.add(S.gameIdx);
@@ -1271,9 +1292,16 @@ function updateAccuracy(){
   var dp=document.getElementById("dsc-pct"); if(dp) dp.textContent=pct;
 }
 function updateProgress(){
-  var t=S.moves.length, d=Math.min(S.moveIdx,t);
-  var pct=(t>0?Math.round(d/t*100):0)+"%";
-  var txt=d+" / "+t;
+  var pct, txt;
+  if(S.mode==="drill" && S.games.length>0){
+    var done=S.drillDone.size, total=S.games.length;
+    pct=Math.round(done/total*100)+"%";
+    txt=done+" / "+total;
+  } else {
+    var t=S.moves.length, d=Math.min(S.moveIdx,t);
+    pct=(t>0?Math.round(d/t*100):0)+"%";
+    txt=d+" / "+t;
+  }
   document.getElementById("prog-fill").style.width=pct;
   document.getElementById("prog-txt").textContent=txt;
   var df=document.getElementById("prog-fill-drawer"); if(df) df.style.width=pct;
@@ -1314,9 +1342,14 @@ function closeDrawer() {
 }
 function syncColorBtns() {
   var w = S.playerColor === "white";
-  // sidebar
+  // sidebar home
   document.getElementById("cbtn-w").className = "cbtn" + (w ? " sw" : "");
   document.getElementById("cbtn-b").className = "cbtn" + (!w ? " sb" : "");
+  // sidebar active panel
+  var aw = document.getElementById("sacbtn-w");
+  var ab = document.getElementById("sacbtn-b");
+  if (aw) aw.className = "sac-btn" + (w ? " sac-active-white" : "");
+  if (ab) ab.className = "sac-btn" + (!w ? " sac-active-black" : "");
   // tablet inline
   ["tcbtn-w","tcbtn-b","tcbtn-w2","tcbtn-b2"].forEach(function(id) {
     var el = document.getElementById(id); if (!el) return;
@@ -1325,13 +1358,7 @@ function syncColorBtns() {
   });
 }
 function syncModeBtns() {
-  var d = S.mode === "drill";
-  ["mbtn-practice","dmbtn-practice","tcmbtn-practice"].forEach(function(id){
-    var el=document.getElementById(id); if(el) el.className="mbtn"+(!d?" active-practice":"");
-  });
-  ["mbtn-drill","dmbtn-drill","tcmbtn-drill"].forEach(function(id){
-    var el=document.getElementById(id); if(el) el.className="mbtn"+(d?" active-drill":"");
-  });
+  // mode toggle UI removed; drill is always active for built-in reps
 }
 function syncDrawerScores() { updateAccuracy(); }
 function pasteLoadDrawer() {
@@ -1354,7 +1381,6 @@ document.addEventListener("keydown",function(e){
   if(e.key==="ArrowRight"&&S.mode==="practice") nextLine();
   if(e.key==="ArrowLeft" &&S.mode==="practice") prevLine();
   if(e.key==="f"||e.key==="F") flipBoard();
-  if(e.key==="d"||e.key==="D") setMode(S.mode==="drill"?"practice":"drill");
 });
 window.addEventListener("resize", applyBoardSize);
 </script>
@@ -1423,6 +1449,228 @@ if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").ca
   // Show error in welcome screen too
   document.getElementById("welcome").innerHTML += '<p style="color:#e05040;font-size:11px;margin-top:8px">Board error: ' + err.message + '</p>';
 }
+</script>
+
+<!-- ── Rep Edit Modal ──────────────────────────────────────────── -->
+<style>
+#rep-edit-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:2000;align-items:center;justify-content:center}
+#rep-edit-overlay.open{display:flex}
+#rep-edit-modal{background:var(--panel);border:1px solid var(--border2);border-radius:14px;width:min(520px,95vw);height:min(600px,80vh);min-width:300px;min-height:240px;display:flex;flex-direction:column;box-shadow:0 16px 48px rgba(0,0,0,.7);overflow:auto;resize:both;position:relative}
+#rep-edit-modal-header{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--border);flex-shrink:0}
+#rep-edit-modal-title{flex:1;font-size:13px;font-weight:800;color:var(--text2)}
+#rep-edit-modal-custom-badge{font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;padding:2px 7px;border-radius:10px;background:var(--gold-bg);color:var(--gold-lt);border:1px solid rgba(212,160,23,.4);display:none}
+#rep-edit-modal-custom-badge.show{display:inline-block}
+#rep-edit-modal-body{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:8px;min-height:0}
+#rep-edit-desc{font-size:11px;color:var(--dim);line-height:1.5}
+#rep-edit-textarea{width:100%;flex:1;min-height:80px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:11px;font-family:monospace;padding:8px 10px;resize:none;outline:none;line-height:1.6}
+#rep-edit-textarea:focus{border-color:var(--green)}
+#rep-edit-status{font-size:10px;min-height:14px;color:var(--dim)}
+#rep-edit-status.ok{color:var(--green-lt)}#rep-edit-status.err{color:var(--red-lt)}
+#rep-edit-modal-footer{display:flex;gap:6px;padding:10px 14px;border-top:1px solid var(--border);flex-shrink:0}
+#rep-edit-reset-btn{padding:6px 11px;border-radius:7px;border:1px solid var(--border2);background:var(--panel2);color:var(--dim);cursor:pointer;font-size:11px;font-weight:700}
+#rep-edit-reset-btn:hover{border-color:var(--red);color:var(--red-lt)}
+#rep-edit-reset-btn:disabled{opacity:.3;pointer-events:none}
+#rep-edit-save-btn{flex:1;padding:6px 11px;border-radius:7px;border:1px solid var(--green);background:var(--green-bg);color:var(--green-lt);cursor:pointer;font-size:11px;font-weight:700}
+#rep-edit-save-btn:hover{background:rgba(95,158,67,.3)}
+#rep-edit-cancel-btn{padding:6px 11px;border-radius:7px;border:1px solid var(--border2);background:var(--panel2);color:var(--text);cursor:pointer;font-size:11px;font-weight:700}
+/* ── Active sidebar ───────────────────────────────────────────── */
+#sb-home{display:flex;flex-direction:column;height:100%;overflow-y:auto;overflow-x:hidden}
+#sb-active{display:none}
+#sb-active-topbar{display:flex;align-items:center;gap:6px;padding:8px 10px;border-bottom:1px solid var(--border);flex-shrink:0}
+#sb-back-btn{padding:4px 8px;border-radius:6px;border:1px solid var(--border2);background:var(--panel2);color:var(--dim);cursor:pointer;font-size:13px;font-weight:700;flex-shrink:0;line-height:1}
+#sb-back-btn:hover{border-color:var(--text);color:var(--text)}
+#sb-active-repname{flex:1;font-size:13px;font-weight:800;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#sb-active-edit-btn{padding:4px 7px;border-radius:6px;border:1px solid var(--border2);background:var(--panel2);color:var(--dim);cursor:pointer;font-size:12px;flex-shrink:0}
+#sb-active-edit-btn:hover{border-color:var(--blue);color:var(--blue)}
+#sb-active-controls{display:flex;align-items:stretch;gap:0;padding:6px 10px;border-bottom:1px solid var(--border);flex-shrink:0;gap:6px}
+#sb-active-color,#sb-active-mode{display:flex;gap:3px;flex:1}
+#sb-active-divider{width:1px;background:var(--border);flex-shrink:0}
+.sac-btn{flex:1;padding:4px 3px;border-radius:6px;border:1px solid var(--border2);background:var(--panel2);color:var(--dim);cursor:pointer;font-size:10px;font-weight:700;text-align:center;white-space:nowrap}
+.sac-btn.sac-active-white{border-color:#ccc;color:var(--text2);background:rgba(255,255,255,.07)}
+.sac-btn.sac-active-black{border-color:#555;color:#bbb;background:rgba(0,0,0,.2)}
+.sac-btn.sac-active-practice{border-color:var(--green);color:var(--green-lt);background:var(--green-bg)}
+.sac-btn.sac-active-drill{border-color:var(--gold);color:var(--gold-lt);background:var(--gold-bg)}
+#sb-active-body{flex:1;overflow-y:auto;display:flex;flex-direction:column;min-height:0}
+#sb-active-body #movelist-row{padding:8px 12px 6px;border-bottom:1px solid var(--border)}
+#sb-active-body #movelist{max-height:none;overflow-y:visible}
+#sb-active-body #prog-row{padding:8px 12px}
+#sb-active-body #annotation{padding:8px 12px 8px 36px}
+#sb-active-body #btn-next-done-wrap{padding:8px 12px}
+#sb-active-body #drill-footer{padding:6px 12px}
+.rep-btn-custom{border-color:var(--gold)!important;color:var(--gold-lt)!important;background:var(--gold-bg)!important}
+</style>
+
+<div id="rep-edit-overlay">
+  <div id="rep-edit-modal">
+    <div id="rep-edit-modal-header">
+      <span id="rep-edit-modal-title">Edit Repertoire</span>
+      <span id="rep-edit-modal-custom-badge">Custom</span>
+      <button id="rep-edit-cancel-btn" onclick="closeRepEdit()" style="padding:3px 10px;font-size:11px;border-radius:6px;border:1px solid var(--border2);background:var(--panel2);color:var(--text);cursor:pointer">✕</button>
+    </div>
+    <div id="rep-edit-modal-body">
+      <div id="rep-edit-desc">Edit the PGN below. Changes are saved in your browser and override the built-in lines. Use the Reset button to restore the original.</div>
+      <textarea id="rep-edit-textarea" spellcheck="false"></textarea>
+      <div id="rep-edit-status"></div>
+    </div>
+    <div id="rep-edit-modal-footer">
+      <button id="rep-edit-reset-btn" onclick="resetRepEdit()">↺ Reset to default</button>
+      <button id="rep-edit-save-btn" onclick="saveRepEdit()">💾 Save &amp; Load</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Rep overrides (localStorage) ─────────────────────────────────
+var REP_STORE_PREFIX = "chess-trainer-rep-";
+var _editingRep = null;
+
+function getRepText(name) {
+  try {
+    var stored = localStorage.getItem(REP_STORE_PREFIX + name);
+    if (stored) return stored;
+  } catch(e) {}
+  return BUILTIN_REPS[name] || null;
+}
+
+function isRepCustom(name) {
+  try { return !!localStorage.getItem(REP_STORE_PREFIX + name); } catch(e) { return false; }
+}
+
+// ── Override loadBuiltin to use stored version ────────────────────
+function loadBuiltin(name) {
+  var text = getRepText(name);
+  if (!text) return;
+  S.mode = "drill";
+  loadGames(text, name);
+}
+
+// ── Sidebar panel switching ───────────────────────────────────────
+function sbGoActive(name) {
+  document.getElementById("sb-home").style.display = "none";
+  document.getElementById("sb-active").style.display = "flex";
+  document.getElementById("sb-active-repname").textContent = name;
+  var custom = isRepCustom(name);
+  var editBtn = document.getElementById("sb-active-edit-btn");
+  editBtn.style.borderColor = custom ? "var(--gold)" : "";
+  editBtn.style.color = custom ? "var(--gold-lt)" : "";
+  syncColorBtns();
+  syncModeBtns();
+}
+
+function sbGoHome() {
+  document.getElementById("sb-active").style.display = "none";
+  document.getElementById("sb-home").style.display = "flex";
+}
+
+// ── Show/hide the edit button based on active rep ─────────────────
+function updateEditRepBtn() {
+  // active panel edit button
+  var editBtn = document.getElementById("sb-active-edit-btn");
+  if (editBtn && S.currentRep) {
+    var custom = isRepCustom(S.currentRep);
+    editBtn.style.borderColor = custom ? "var(--gold)" : "";
+    editBtn.style.color = custom ? "var(--gold-lt)" : "";
+  }
+  // home panel edit button (kept for when user is on home panel with a rep loaded)
+  var wrap = document.getElementById("rep-edit-btn-wrap");
+  if (wrap) wrap.style.display = S.currentRep ? "block" : "none";
+  var label = document.getElementById("rep-edit-active-label");
+  if (label && S.currentRep) label.textContent = "Edit " + S.currentRep;
+}
+
+// ── Render rep grids ──────────────────────────────────────────────
+function renderRepGrids() {
+  var names = Object.keys(BUILTIN_REPS);
+  ["rep-grid-sidebar", "rep-grid-tablet"].forEach(function(gridId) {
+    var grid = document.getElementById(gridId);
+    if (!grid) return;
+    grid.innerHTML = "";
+    names.forEach(function(name) {
+      var custom = isRepCustom(name);
+      var btn = document.createElement("button");
+      btn.className = "rep-btn" + (custom ? " rep-btn-custom" : "");
+      btn.textContent = name;
+      btn.title = custom ? name + " (customised)" : name;
+      btn.onclick = function() { loadBuiltin(name); };
+      grid.appendChild(btn);
+    });
+  });
+  updateEditRepBtn();
+}
+
+// ── Edit modal ────────────────────────────────────────────────────
+function openRepEdit(name) {
+  _editingRep = name;
+  document.getElementById("rep-edit-modal-title").textContent = "Edit — " + name;
+  document.getElementById("rep-edit-textarea").value = getRepText(name);
+  document.getElementById("rep-edit-status").textContent = "";
+  document.getElementById("rep-edit-status").className = "";
+  var custom = isRepCustom(name);
+  document.getElementById("rep-edit-modal-custom-badge").className = custom ? "show" : "";
+  document.getElementById("rep-edit-reset-btn").disabled = !custom;
+  document.getElementById("rep-edit-overlay").classList.add("open");
+  setTimeout(function(){ document.getElementById("rep-edit-textarea").focus(); }, 50);
+}
+
+function closeRepEdit() {
+  document.getElementById("rep-edit-overlay").classList.remove("open");
+  _editingRep = null;
+}
+
+function saveRepEdit() {
+  if (!_editingRep) return;
+  var text = document.getElementById("rep-edit-textarea").value.trim();
+  if (!text) {
+    setRepEditStatus("Cannot save empty PGN", false); return;
+  }
+  // Quick validation: try parsing
+  try {
+    var games = parsePgn(text);
+    if (!games.length) { setRepEditStatus("No valid moves found — check your PGN", false); return; }
+    localStorage.setItem(REP_STORE_PREFIX + _editingRep, text);
+    setRepEditStatus("✓ Saved " + games.length + " line(s) — loading now…", true);
+    renderRepGrids();
+    updateEditRepBtn();
+    var name = _editingRep;
+    setTimeout(function() {
+      loadGames(text, name);
+      closeRepEdit();
+    }, 700);
+  } catch(e) {
+    setRepEditStatus("Parse error: " + e.message, false);
+  }
+}
+
+function resetRepEdit() {
+  if (!_editingRep) return;
+  if (!confirm("Reset \"" + _editingRep + "\" to the built-in default? Your edits will be lost.")) return;
+  try { localStorage.removeItem(REP_STORE_PREFIX + _editingRep); } catch(e) {}
+  document.getElementById("rep-edit-textarea").value = BUILTIN_REPS[_editingRep] || "";
+  document.getElementById("rep-edit-modal-custom-badge").className = "";
+  document.getElementById("rep-edit-reset-btn").disabled = true;
+  setRepEditStatus("Reset to default — save to apply", true);
+  renderRepGrids();
+  updateEditRepBtn();
+}
+
+function setRepEditStatus(msg, ok) {
+  var el = document.getElementById("rep-edit-status");
+  el.textContent = msg;
+  el.className = ok ? "ok" : "err";
+}
+
+// Close on overlay click
+document.getElementById("rep-edit-overlay").addEventListener("click", function(e) {
+  if (e.target === this) closeRepEdit();
+});
+
+// Close on Escape
+document.addEventListener("keydown", function(e) {
+  if (e.key === "Escape" && document.getElementById("rep-edit-overlay").classList.contains("open")) closeRepEdit();
+});
+
+// Render on load
+renderRepGrids();
 </script>
 </body>
 </html>
