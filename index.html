@@ -203,11 +203,6 @@ html,body{height:100%;width:100%;background:var(--bg2);color:var(--text);
       </div>
       <div class="sb-hdr">Repertoires</div>
       <div class="rep-grid" id="rep-grid-sidebar"></div>
-      <div id="rep-edit-btn-wrap" style="display:none;padding:4px 12px 6px;border-bottom:1px solid var(--border);flex-shrink:0">
-        <button id="rep-edit-active-btn" onclick="openRepEdit(S.currentRep)" style="width:100%;padding:5px 8px;border-radius:7px;border:1px solid var(--border2);background:var(--panel2);color:var(--dim);cursor:pointer;font-size:11px;font-weight:600;text-align:left;display:flex;align-items:center;gap:6px">
-          <span>✏️</span><span id="rep-edit-active-label">Edit current repertoire</span>
-        </button>
-      </div>
       <div class="sb-hdr">Play as</div>
       <div id="color-pick">
         <div class="cbtn sw" id="cbtn-w" onclick="setColor('white')">♔ White</div>
@@ -235,9 +230,9 @@ html,body{height:100%;width:100%;background:var(--bg2);color:var(--text);
 
       <!-- scores -->
       <div class="sb-scores" style="flex-shrink:0">
-        <div class="sbs c"><span class="v" id="sc-c">0</span><span class="l">Lines</span></div>
-        <div class="sbs w"><span class="v" id="sc-w">0</span><span class="l">Errors</span></div>
-        <div class="sbs"><span class="v" id="sc-pct" style="color:var(--text)">—</span><span class="l">Accuracy</span></div>
+        <div class="sbs c"><span class="v" id="sc-c2">0</span><span class="l">Clean</span></div>
+        <div class="sbs w"><span class="v" id="sc-w2">0</span><span class="l">Errors</span></div>
+        <div class="sbs"><span class="v" id="sc-pct2" style="color:var(--text)">—</span><span class="l">Accuracy</span></div>
       </div>
 
       <!-- scrollable live content -->
@@ -338,7 +333,7 @@ html,body{height:100%;width:100%;background:var(--bg2);color:var(--text);
         <span class="ps-tag"  id="bot-tag"></span>
         <span id="status-icon">♟</span>
         <span id="status-msg">—</span>
-        <span id="streak-display" style="display:none;font-size:11px;font-weight:700;color:var(--gold-lt);white-space:nowrap">🔥 <span id="streak-val">0</span> best: <span id="best-val">0</span></span>
+        <span id="score-display" style="display:none;font-size:11px;font-weight:700;color:var(--text2);white-space:nowrap"><span id="score-val">0/0</span></span>
         <button class="sb-btn" id="btn-hint" onclick="showHint()" disabled>💡 Hint</button>
         <button class="sb-btn" id="btn-skip" onclick="doSkip()" disabled>⏭ Skip</button>
       </div>
@@ -932,7 +927,7 @@ var INIT_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 var chessEngine = null;
 var S = {
   games:[], gameIdx:-1, moves:[], moveIdx:0, fen:INIT_FEN,
-  playerColor:"white", completed:new Set(), busy:false, scoreC:0, scoreW:0, lineHadError:false,
+  playerColor:"white", completed:new Set(), busy:false, scoreC:0, scoreW:0, scoreLines:0, lineHadError:false,
   mode:"practice", drillQueue:[], drillDone:new Set(),
   streak:0, bestStreak:0, currentRep:null
 };
@@ -945,7 +940,7 @@ function loadGames(text, filename) {
     S.games = games; S.completed = new Set();
     S.currentRep = (filename && BUILTIN_REPS[filename]) ? filename : null;
     setPgnStatus("✓ " + (filename||"") + " — " + games.length + " line(s)", true);
-    drillReset();
+    drillReset(true);
     selectGame(0);
     updateEditRepBtn();
     if (S.currentRep) sbGoActive(S.currentRep);
@@ -1056,10 +1051,11 @@ function doValidate(from,to,promo,prevFen){
     if(S.mode==="drill") { runOpponent(); }
     else { setTimeout(function(){setCard("idle","♟","Your turn");runOpponent();},500); }
   } else {
+    var firstError = !S.lineHadError;
     S.lineHadError=true;
     playSound("wrong");
     setCard("wrong","✗","Wrong — try again!");
-    if(S.mode==="drill") updateStreak(false);
+    if(S.mode==="drill") { updateStreak(false); if(firstError){ S.scoreW++; updateAccuracy(); } }
     S.busy=false;
     requestAnimationFrame(function(){
       board.setPosition(prevFen,false);
@@ -1105,6 +1101,10 @@ function selectGame(idx){
   var d=S.mode==="drill";
   document.getElementById("btn-prev").style.display=d?"none":"";
   document.getElementById("btn-next").style.display=d?"none":"";
+  var restartBtn=document.querySelector("#ctrl-row .btn.g");
+  var flipBtn=document.querySelector("#ctrl-row .btn.r");
+  if(restartBtn) restartBtn.style.display=d?"none":"";
+  if(flipBtn) flipBtn.style.display=d?"none":"";
   document.getElementById("btn-next-done-wrap").style.display="none";
   document.getElementById("btn-hint").disabled=false;
   document.getElementById("btn-skip").disabled=false;
@@ -1118,19 +1118,22 @@ function selectGame(idx){
 function setMode(mode){
   S.mode=mode;
   S.streak=0;
-  var el=document.getElementById("streak-display");
-  if(el) el.style.display=mode==="drill"?"inline-flex":"none";
+  var el=document.getElementById("score-display");
+  if(el) el.style.display=mode==="drill"?"inline":"none";
   document.getElementById("mbtn-practice").className="mbtn"+(mode==="practice"?" active-practice":"");
   document.getElementById("mbtn-drill").className   ="mbtn"+(mode==="drill"   ?" active-drill"   :"");
-  if(mode==="drill") drillReset();
+  if(mode==="drill") drillReset(true);
   else document.getElementById("drill-footer").classList.remove("show");
   if(S.gameIdx>=0) selectGame(S.gameIdx);
 }
 
-function drillReset(){
+function drillReset(noSelect){
   var a=[]; for(var i=0;i<S.games.length;i++) a.push(i);
   for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}
-  S.drillQueue=a; S.drillDone=new Set(); updateDrillFooter(); updateProgress();
+  S.drillQueue=a; S.drillDone=new Set();
+  S.scoreC=0; S.scoreW=0; S.scoreLines=0;
+  updateAccuracy(); updateScoreDisplay(); updateDrillFooter(); updateProgress();
+  if(!noSelect && S.games.length) selectGame(S.drillQueue.shift());
 }
 function updateDrillFooter(){
   var f=document.getElementById("drill-footer");
@@ -1246,12 +1249,14 @@ function finishLine(){
   document.getElementById("btn-skip").disabled=true;
   var th=document.getElementById("tbtn-hint"); if(th) th.disabled=true;
   var ts=document.getElementById("tbtn-skip"); if(ts) ts.disabled=true;
-  if (S.lineHadError) {
-    S.scoreW++;
+  if(S.mode==="drill"){
+    S.scoreLines++;
+    if(!S.lineHadError) S.scoreC++;
+    updateAccuracy();
   } else {
-    S.scoreC++;
+    if(S.lineHadError){ S.scoreW++; } else { S.scoreC++; }
+    updateAccuracy();
   }
-  updateAccuracy();
   launchConfetti();
   if(S.mode==="drill"){
     S.drillDone.add(S.gameIdx); updateDrillFooter();
@@ -1282,13 +1287,21 @@ function showAnnotation(text,who){
   } else { p.classList.remove("show"); }
 }
 function updateAccuracy(){
-  var t=S.scoreC+S.scoreW;
-  var pct=t>0?Math.round(S.scoreC/t*100)+"%":"—";
-  document.getElementById("sc-c").textContent=S.scoreC;
-  document.getElementById("sc-w").textContent=S.scoreW;
-  document.getElementById("sc-pct").textContent=pct;
-  var dc=document.getElementById("dsc-c"); if(dc) dc.textContent=S.scoreC;
-  var dw=document.getElementById("dsc-w"); if(dw) dw.textContent=S.scoreW;
+  var pct, cVal, wVal;
+  if(S.mode==="drill"){
+    // Lines: clean / total completed; Errors: total wrong moves; Accuracy: clean line %
+    cVal=S.scoreC; wVal=S.scoreW;
+    pct=S.scoreLines>0?Math.round(S.scoreC/S.scoreLines*100)+"%":"—";
+  } else {
+    cVal=S.scoreC; wVal=S.scoreW;
+    var t=S.scoreC+S.scoreW;
+    pct=t>0?Math.round(S.scoreC/t*100)+"%":"—";
+  }
+  ["sc-c","sc-c2"].forEach(function(id){var el=document.getElementById(id);if(el)el.textContent=cVal;});
+  ["sc-w","sc-w2"].forEach(function(id){var el=document.getElementById(id);if(el)el.textContent=wVal;});
+  ["sc-pct","sc-pct2"].forEach(function(id){var el=document.getElementById(id);if(el)el.textContent=pct;});
+  var dc=document.getElementById("dsc-c"); if(dc) dc.textContent=cVal;
+  var dw=document.getElementById("dsc-w"); if(dw) dw.textContent=wVal;
   var dp=document.getElementById("dsc-pct"); if(dp) dp.textContent=pct;
 }
 function updateProgress(){
@@ -1325,10 +1338,14 @@ function updateStreak(success) {
   } else {
     S.streak = 0;
   }
-  var el = document.getElementById("streak-display");
-  if (el) el.style.display = S.mode === "drill" ? "inline-flex" : "none";
-  var sv = document.getElementById("streak-val"); if (sv) sv.textContent = S.streak;
-  var bv = document.getElementById("best-val"); if (bv) bv.textContent = S.bestStreak;
+  updateScoreDisplay();
+}
+function updateScoreDisplay() {
+  var el = document.getElementById("score-display");
+  if (!el) return;
+  el.style.display = S.mode === "drill" ? "inline" : "none";
+  var sv = document.getElementById("score-val");
+  if (sv) sv.textContent = S.scoreC + " / " + S.scoreLines;
 }
 
 function openDrawer() {
@@ -1564,18 +1581,11 @@ function sbGoHome() {
 
 // ── Show/hide the edit button based on active rep ─────────────────
 function updateEditRepBtn() {
-  // active panel edit button
   var editBtn = document.getElementById("sb-active-edit-btn");
-  if (editBtn && S.currentRep) {
-    var custom = isRepCustom(S.currentRep);
-    editBtn.style.borderColor = custom ? "var(--gold)" : "";
-    editBtn.style.color = custom ? "var(--gold-lt)" : "";
-  }
-  // home panel edit button (kept for when user is on home panel with a rep loaded)
-  var wrap = document.getElementById("rep-edit-btn-wrap");
-  if (wrap) wrap.style.display = S.currentRep ? "block" : "none";
-  var label = document.getElementById("rep-edit-active-label");
-  if (label && S.currentRep) label.textContent = "Edit " + S.currentRep;
+  if (!editBtn || !S.currentRep) return;
+  var custom = isRepCustom(S.currentRep);
+  editBtn.style.borderColor = custom ? "var(--gold)" : "";
+  editBtn.style.color = custom ? "var(--gold-lt)" : "";
 }
 
 // ── Render rep grids ──────────────────────────────────────────────
