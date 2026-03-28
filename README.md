@@ -1,24 +1,36 @@
 # ♟ Chess Repertoire Trainer
 
-A lightweight, single-file Progressive Web App for drilling and practising chess opening repertoires. No account, no server, no install required — just open and play.
+A lightweight, single-file Progressive Web App for drilling chess opening repertoires. No account, no server, no install required — just open and play.
+
+---
+
+## How It Works
+
+Select a built-in repertoire (or load your own PGN) and the app immediately starts a **drill session** — lines are shuffled randomly and you play through each one against the book. Wrong moves snap back instantly so you can try again. Once every line is completed the drill resets automatically.
 
 ---
 
 ## Features
 
-### Two Training Modes
-- **📖 Practice** — Work through repertoire lines one at a time, with feedback after each move. Ideal for learning new openings.
-- **🎯 Drill** — Randomly shuffles and cycles through all lines until every one is completed without errors. Tracks a live streak counter for motivation.
+### Drill Mode
+- Lines are randomly shuffled on every new session
+- Opponent book moves play instantly — no artificial delays
+- Wrong moves snap back with no interruption to flow
+- Only the **first mistake per line** counts as an error
+- Status bar shows a live **clean / total** fraction (e.g. `4 / 6`)
+- ↺ **Reset** reshuffles all lines, resets the board and all counters
 
-### PGN Loading
-- **Open file** — Load any `.pgn` or `.txt` file directly from your device.
-- **Paste text** — Paste raw PGN into the built-in textarea.
-- Supports two PGN formats:
-  - Standard PGN with `[Event]` headers
-  - Custom `#`-prefixed heading format (used by the built-in repertoires)
+### Sidebar — Active Session
+Once a repertoire is loaded the sidebar switches to a focused training view:
+- **← Back** returns to the repertoire list
+- **Play as** toggle (White / Black) — board flips instantly
+- **Clean / Errors / Accuracy** counters update live as you drill
+- **Move list** tracks your position in the current line
+- **Progress bar** shows lines completed out of total lines in the drill
+- **✏️ Edit** button opens the PGN editor for the active repertoire
 
 ### Built-in Repertoires
-Six opening repertoires are included out of the box and load instantly:
+Six opening repertoires load instantly with one click:
 
 | Name | Description |
 |------|-------------|
@@ -29,61 +41,58 @@ Six opening repertoires are included out of the box and load instantly:
 | QGD | Queen's Gambit Declined |
 | Caro | Caro-Kann Defence |
 
+### Editing Built-in Repertoires
+Every built-in repertoire can be customised directly in the app:
+- Click **✏️** in the active sidebar to open the PGN editor
+- Edit the PGN in the resizable modal and click **💾 Save & Load**
+- Changes are stored in your browser (`localStorage`) and persist across sessions
+- **↺ Reset to default** restores the original lines at any time
+- Customised repertoires are highlighted in gold
+
+### Loading Your Own PGN
+- **📂 Open file** — load any `.pgn` or `.txt` file from your device
+- **Paste text** — paste raw PGN into the built-in textarea
+- Supports two formats:
+  - Standard PGN with `[Event]` headers (one game per line)
+  - Custom `#`-prefixed heading format used by the built-in repertoires
+
 ### Board & Interaction
 - Interactive drag-and-drop board powered by [cm-chessboard v8](https://github.com/shaack/cm-chessboard)
-- Visual move markers highlight legal squares on piece selection
+- Legal move dots shown on piece selection
 - Promotion dialog for pawn promotions
-- Play as **White** or **Black** — the board flips accordingly
-- Opponent moves are played automatically after a short delay
-
-### Feedback & Scoring
-- ✅ Correct move: green flash + sound
-- ❌ Wrong move: red flash + sound, piece snaps back
-- Sidebar shows **Lines completed**, **Errors**, and **Accuracy %**
-- Drill mode shows a 🔥 **streak** counter (current and best)
-- Move list panel highlights the current position in the line
-- Progress bar shows how far through the current line you are
-- **Annotations** — PGN comments in `{braces}` are displayed as coaching notes
+- Illegal moves (dragging to a non-legal square) are silently ignored — no penalty
+- Annotations from PGN `{comments}` shown as coaching notes during the line
 
 ### Sound Effects
-Four audio cues (`.ogg` format):
-- `move` — normal move
-- `capture` — piece taken
-- `done` — line completed
-- `wrong` — incorrect move
+Four audio cues (`.ogg`): `move`, `capture`, `done`, `wrong`
 
 ### Progressive Web App (PWA)
-- Installable on desktop and mobile via the browser's "Add to Home Screen" / install prompt
-- Full offline support via a Service Worker (cache-first for assets, network-first for HTML)
-- Landscape orientation hint for mobile; responsive layout with a bottom drawer for settings on small screens
+- Installable on desktop and mobile
+- Full offline support via Service Worker (network-first for HTML, cache-first for assets)
+- Responsive layout — bottom drawer on mobile for settings
 
 ---
 
 ## Getting Started
 
 ### Option 1 — Open directly in a browser
-Because everything is in `index.html`, you can open it straight from the filesystem:
-
 ```
 open index.html
 ```
-
-All dependencies are loaded from jsDelivr CDN, so an internet connection is needed on first load (or to update the app). Once loaded, the Service Worker caches everything for offline use.
+An internet connection is needed on first load to fetch CDN assets. The Service Worker then caches everything for offline use.
 
 ### Option 2 — Serve locally (recommended for PWA install)
-
 ```bash
 # Python 3
 python -m http.server 8080
 
-# Node.js (npx)
+# Node.js
 npx serve .
 ```
+Then visit `http://localhost:8080`.
 
-Then visit `http://localhost:8080` in your browser.
-
-### Option 3 — Deploy to any static host
-Upload the repository files to GitHub Pages, Netlify, Vercel, or any static hosting provider. No build step needed.
+### Option 3 — Deploy to a static host
+Upload to GitHub Pages, Netlify, Vercel, or any static host. No build step needed.
 
 ---
 
@@ -92,7 +101,7 @@ Upload the repository files to GitHub Pages, Netlify, Vercel, or any static host
 ```
 chess-trainer-main/
 ├── index.html        # Entire app — HTML, CSS, and JavaScript in one file
-├── manifest.json     # PWA manifest (name, icons, display mode)
+├── manifest.json     # PWA manifest
 ├── sw.js             # Service Worker for offline caching
 └── sounds/
     ├── capture.ogg
@@ -105,23 +114,19 @@ chess-trainer-main/
 
 ## Adding Your Own Repertoire
 
-### Using a PGN file
-Export your repertoire from any chess tool (Lichess Studies, ChessBase, etc.) as a `.pgn` file, then use the **📂 Open file** button to load it. Each game in the file becomes one training line, named after its `[Event]` tag.
+### Standard PGN
+Export from Lichess Studies, ChessBase, etc. Each `[Event]` game becomes one drill line.
 
-### Using the custom `#` format
-You can also write lines in a plain-text format:
-
+### Custom `#` format
 ```
-# My Repertoire Title
+# My Repertoire
 
 #1 Line Name
 1. e4 e5 2. Nf3 Nc6 3. Bb5
 
-#2 Another Line
+#2 Another Line {This comment appears as a coaching note}
 1. e4 c5 2. Nf3 d6
 ```
-
-Use `{comment text}` inside a line to add an annotation that appears on screen when that move is reached.
 
 ---
 
@@ -131,14 +136,14 @@ All loaded via CDN — no `npm install` required.
 
 | Library | Version | Purpose |
 |---------|---------|---------|
-| [chess.js](https://github.com/jhlywa/chess.js) | 1.3.0 | Chess rules engine, move validation, FEN/PGN parsing |
-| [cm-chessboard](https://github.com/shaack/cm-chessboard) | 8.7.8 | Interactive SVG chessboard UI |
+| [chess.js](https://github.com/jhlywa/chess.js) | 1.3.0 | Chess rules, move validation, FEN/PGN parsing |
+| [cm-chessboard](https://github.com/shaack/cm-chessboard) | 8.7.8 | Interactive SVG board UI |
 
 ---
 
 ## Browser Support
 
-Works in any modern browser that supports ES Modules and `importmap` (Chrome 89+, Firefox 108+, Safari 16.4+). The Service Worker requires HTTPS or `localhost`.
+Requires ES Modules and `importmap` support: Chrome 89+, Firefox 108+, Safari 16.4+. Service Worker requires HTTPS or `localhost`.
 
 ---
 
