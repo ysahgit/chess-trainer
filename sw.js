@@ -1,4 +1,4 @@
-const CACHE = "chess-trainer-v5";
+const CACHE = "chess-trainer-v6";
 const PRECACHE = [
   "./index.html",
   "./manifest.json",
@@ -36,7 +36,6 @@ self.addEventListener("fetch", e => {
   const isHTML = url.endsWith("index.html") || url.endsWith("/");
 
   if (isHTML) {
-    // Network first — get fresh app, fall back to cache if offline
     e.respondWith(
       fetch(e.request).then(res => {
         const clone = res.clone();
@@ -45,7 +44,6 @@ self.addEventListener("fetch", e => {
       }).catch(() => caches.match(e.request))
     );
   } else {
-    // Cache first — assets rarely change
     e.respondWith(
       caches.match(e.request).then(cached => cached || fetch(e.request).then(res => {
         const clone = res.clone();
