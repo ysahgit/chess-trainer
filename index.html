@@ -286,10 +286,20 @@ html,body{height:100%;width:100%;background:var(--bg2);color:var(--text);
       </div>
       <div id="sb-params-footer">
         <div class="param-lbl" style="padding:0 0 4px">Import PGN</div>
-        <input type="file" id="import-file-input" accept=".pgn,.txt" style="position:absolute;opacity:0;width:0;height:0">
-        <label for="import-file-input" class="load-btn">📂 Open file</label>
-        <textarea class="pgn-paste" id="params-paste-area" placeholder="…or paste PGN here" spellcheck="false"></textarea>
-        <button class="load-sub-btn" onclick="paramsLoadFromPaste()">↳ Load pasted text</button>
+        <div id="import-lock">
+          <input id="import-pin" type="password" inputmode="numeric" maxlength="8"
+            placeholder="Enter code to unlock"
+            style="width:100%;padding:6px 10px;background:var(--bg2);border:1px solid var(--border);
+            border-radius:7px;color:var(--text);font-size:12px;outline:none;font-family:monospace"
+            oninput="checkImportPin(this.value)" autocomplete="off">
+          <div id="import-pin-status" class="load-status" style="margin-top:2px"></div>
+        </div>
+        <div id="import-controls" style="display:none;flex-direction:column;gap:6px">
+          <input type="file" id="import-file-input" accept=".pgn,.txt" style="position:absolute;opacity:0;width:0;height:0">
+          <label for="import-file-input" class="load-btn">📂 Open file</label>
+          <textarea class="pgn-paste" id="params-paste-area" placeholder="…or paste PGN here" spellcheck="false"></textarea>
+          <button class="load-sub-btn" onclick="paramsLoadFromPaste()">↳ Load pasted text</button>
+        </div>
         <div id="import-status" class="load-status"></div>
       </div>
     </div>
@@ -1123,9 +1133,9 @@ function autoplayPrefix(moves, prevMoves, onDone) {
     updateStatusBar(); updateMovelist();
     step++;
     if (S.moveIdx >= moves.length) { finishLine(); return; }
-    setTimeout(playStep, 200);
+    setTimeout(playStep, 300);
   }
-  setTimeout(playStep, 100);
+  setTimeout(playStep, 300);
 }
 
 // ── Select a game (line) ──────────────────────────────────────────
@@ -1185,7 +1195,11 @@ function doValidate(from, to, promo, prevFen) {
     updateStatusBar(); updateMovelist();
     S.busy = false;
     if (S.moveIdx >= S.moves.length) { finishLine(); return; }
-    runOpponent();
+    if (S.mode === "drill") {
+      runOpponent(0);
+    } else {
+      setTimeout(function() { runOpponent(200); }, 200);
+    }
   } else {
     var firstError = !S.lineHadError;
     S.lineHadError = true;
@@ -1470,6 +1484,7 @@ function goParams() {
   document.getElementById("welcome").style.display = "flex";
   document.getElementById("trainer").style.display = "none";
   document.getElementById("drill-modal-overlay").classList.remove("open");
+  resetImportLock();
   refreshParamsUI();
 }
 
@@ -1485,6 +1500,7 @@ function goActive() {
 function selectSlot(id) {
   _currentSlot = id;
   setImportStatus("");
+  resetImportLock();
   document.getElementById("sb-home").style.display = "none";
   document.getElementById("sb-params").style.display = "flex";
   refreshParamsUI();
@@ -1556,7 +1572,29 @@ function renderHomeGrid() {
   });
 }
 
-// ── Import handlers ───────────────────────────────────────────────
+var IMPORT_PIN = "1277";
+
+function checkImportPin(val) {
+  if (val === IMPORT_PIN) {
+    document.getElementById("import-lock").style.display = "none";
+    document.getElementById("import-controls").style.display = "flex";
+    document.getElementById("import-pin-status").textContent = "";
+    setImportStatus("");
+  } else if (val.length >= IMPORT_PIN.length) {
+    document.getElementById("import-pin-status").textContent = "Incorrect code";
+    document.getElementById("import-pin-status").className = "load-status err";
+    document.getElementById("import-pin").value = "";
+  }
+}
+
+function resetImportLock() {
+  document.getElementById("import-lock").style.display = "";
+  document.getElementById("import-controls").style.display = "none";
+  document.getElementById("import-pin").value = "";
+  document.getElementById("import-pin-status").textContent = "";
+  document.getElementById("import-pin-status").className = "load-status";
+  setImportStatus("");
+}
 function setImportStatus(msg, type) {
   var el = document.getElementById("import-status");
   if (el) { el.textContent = msg; el.className = "load-status" + (type ? " "+type : ""); }
