@@ -53,16 +53,19 @@ html,body{height:100%;width:100%;background:var(--bg2);color:var(--text);
 #rep-home-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:10px 12px;overflow-y:auto}
 .rep-home-btn{padding:10px 8px;border-radius:10px;border:2px solid var(--border2);
   background:var(--panel2);color:var(--text);cursor:pointer;font-size:12px;font-weight:700;
-  text-align:center;display:flex;flex-direction:column;gap:3px;min-height:52px;
-  align-items:center;justify-content:center;transition:border-color .15s,background .15s}
+  text-align:center;display:flex;align-items:center;justify-content:space-between;gap:4px;
+  min-height:40px;position:relative}
 .rep-home-btn:hover{border-color:var(--blue);background:rgba(74,143,212,.08)}
 .rep-home-btn.color-white{border-color:var(--white-rep-border);background:var(--white-rep)}
 .rep-home-btn.color-white:hover{border-color:rgba(220,200,140,.7)}
 .rep-home-btn.color-black{border-color:var(--black-rep-border);background:var(--black-rep)}
 .rep-home-btn.color-black:hover{border-color:rgba(150,150,190,.7)}
-.rep-home-btn.empty{opacity:.35;cursor:default;border-style:dashed}
-.rep-home-btn.empty:hover{border-color:var(--border2);background:var(--panel2)}
-.rep-home-name{font-size:13px;font-weight:800;color:var(--text2)}
+.rep-home-btn.empty{opacity:.35;border-style:dashed;justify-content:center}
+.rep-home-btn.empty:hover{border-color:var(--border2);background:var(--panel2);opacity:.5}
+.rep-home-name{font-size:13px;font-weight:800;color:var(--text2);flex:1;text-align:left}
+.rep-home-gear{font-size:11px;color:var(--dim);flex-shrink:0;padding:2px 3px;border-radius:4px;
+  line-height:1;opacity:.6;cursor:pointer}
+.rep-home-gear:hover{opacity:1;color:var(--text);background:rgba(255,255,255,.08)}
 .rep-home-desc{font-size:9px;color:var(--dim);font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:90px}
 .rep-home-tag{font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;margin-top:1px}
 .tag-w{background:rgba(220,200,140,.2);color:#d4c47a;border:1px solid rgba(220,200,140,.3)}
@@ -148,9 +151,7 @@ html,body{height:100%;width:100%;background:var(--bg2);color:var(--text);
 .cm-chessboard .coordinates .coordinate{fill:#6b6f82!important;font-size:11px}
 
 /* ── Status bar ── */
-#mobile-exit-btn{display:none;padding:4px 10px;border-radius:6px;border:1px solid var(--border2);
-  background:var(--panel2);color:var(--dim);cursor:pointer;font-size:11px;font-weight:700;
-  align-self:flex-start;flex-shrink:0}border-radius:10px;
+#mobile-exit-btn{display:none;gap:6px;align-self:stretch;flex-shrink:0}border-radius:10px;
   padding:6px 10px;border:1px solid var(--border2);flex-shrink:0;min-height:36px}
 #bot-strip.s-correct{border-color:var(--green);background:var(--green-bg)}
 #bot-strip.s-wrong{border-color:var(--red);background:var(--red-bg)}
@@ -190,8 +191,9 @@ html,body{height:100%;width:100%;background:var(--bg2);color:var(--text);
   #sidebar-card{border-radius:0;border-left:none;border-right:none;border-top:none;height:auto;max-height:100vh}
   #sb-home{height:auto}
   #rep-home-grid{grid-template-columns:repeat(4,1fr);gap:4px;padding:8px}
-  .rep-home-btn{padding:8px 4px;border-radius:8px;min-height:36px}
+  .rep-home-btn{padding:6px 6px;border-radius:8px;min-height:34px}
   .rep-home-name{font-size:11px}
+  .rep-home-gear{font-size:10px}
   #home-load-section .sb-hdr{display:none}
   #home-load-section > div{padding:6px 8px;gap:4px}
   .pgn-paste{height:44px}
@@ -202,7 +204,7 @@ html,body{height:100%;width:100%;background:var(--bg2);color:var(--text);
   /* Hide sidebar when training is active */
   body.training #sidebar{display:none}
   body.training #main{order:1;height:100%}
-  body.training #mobile-exit-btn{display:block}
+  body.training #mobile-exit-btn{display:flex}
   html,body{overflow:hidden}
 }
 /* ── Mobile: landscape ── */
@@ -211,8 +213,9 @@ html,body{height:100%;width:100%;background:var(--bg2);color:var(--text);
   #sidebar{width:160px;flex-shrink:0;order:2}
   #sidebar-card{border-radius:10px}
   #rep-home-grid{grid-template-columns:repeat(2,1fr);gap:4px;padding:6px 8px}
-  .rep-home-btn{padding:6px 4px;border-radius:7px;min-height:30px}
+  .rep-home-btn{padding:5px 6px;border-radius:7px;min-height:28px}
   .rep-home-name{font-size:10px}
+  .rep-home-gear{font-size:9px}
   #home-load-section .sb-hdr{font-size:9px}
   .pgn-paste{height:44px}
   .load-btn{padding:5px;font-size:10px}
@@ -294,8 +297,9 @@ html,body{height:100%;width:100%;background:var(--bg2);color:var(--text);
     <!-- ACTIVE: live training view -->
     <div id="sb-active">
       <div id="sb-active-topbar">
-        <button id="sb-active-back" onclick="goParams()">←</button>
+        <button id="sb-active-back" onclick="goHome()">←</button>
         <span id="sb-active-repname">—</span>
+        <button id="sb-active-settings" onclick="goParams()" title="Settings" style="padding:4px 7px;border-radius:6px;border:1px solid var(--border2);background:var(--panel2);color:var(--dim);cursor:pointer;font-size:12px;flex-shrink:0">⚙</button>
       </div>
       <div class="sb-scores">
         <div class="sbs c"><span class="v" id="sc-clean">0</span><span class="l">Clean</span></div>
@@ -323,7 +327,10 @@ html,body{height:100%;width:100%;background:var(--bg2);color:var(--text);
       <p style="color:var(--dim);font-size:13px">Select a repertoire to begin</p>
     </div>
     <div id="trainer" style="display:none">
-      <div id="mobile-exit-btn" onclick="goHome()">← Exit</div>
+      <div id="mobile-exit-btn">
+        <button onclick="goHome()" style="padding:4px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--panel2);color:var(--dim);cursor:pointer;font-size:11px;font-weight:700">← Exit</button>
+        <button onclick="goParams()" style="padding:4px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--panel2);color:var(--dim);cursor:pointer;font-size:11px;font-weight:700">⚙ Settings</button>
+      </div>
       <div id="board-container"></div>
       <div id="bot-strip">
         <div id="status-left">
@@ -1519,25 +1526,32 @@ function renderHomeGrid() {
     btn.className = "rep-home-btn" + (isEmpty ? " empty" : "") +
       (!isEmpty && p.color === "white" ? " color-white" : "") +
       (!isEmpty && p.color === "black" ? " color-black" : "");
-    // Empty slots open params to configure; filled slots start training
-    btn.onclick = (function(id, empty) {
-      return function() {
-        if (empty) {
-          // Open params panel to configure this empty slot
-          _currentSlot = id;
-          setImportStatus("");
-          document.getElementById("sb-home").style.display = "none";
-          document.getElementById("sb-params").style.display = "flex";
-          refreshParamsUI();
-        } else {
-          startRepById(id);
-        }
-      };
-    })(def.id, isEmpty);
-    var nameEl = document.createElement("div");
+
+    var nameEl = document.createElement("span");
     nameEl.className = "rep-home-name";
     nameEl.textContent = isEmpty ? "+" : p.name;
     btn.appendChild(nameEl);
+
+    if (!isEmpty) {
+      // Gear icon — opens settings, stops propagation so it doesn't start session
+      var gear = document.createElement("span");
+      gear.className = "rep-home-gear";
+      gear.textContent = "⚙";
+      gear.title = "Settings";
+      gear.onclick = (function(id) {
+        return function(e) {
+          e.stopPropagation();
+          selectSlot(id);
+        };
+      })(def.id);
+      btn.appendChild(gear);
+      btn.onclick = (function(id) { return function() { startRepById(id); }; })(def.id);
+    } else {
+      btn.onclick = (function(id) {
+        return function() { selectSlot(id); };
+      })(def.id);
+    }
+
     grid.appendChild(btn);
   });
 }
