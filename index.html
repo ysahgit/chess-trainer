@@ -76,8 +76,9 @@ html,body{height:100%;width:100%;background:var(--bg2);color:var(--text);
 #sb-params-back{padding:4px 8px;border-radius:6px;border:1px solid var(--border2);background:var(--panel2);color:var(--dim);cursor:pointer;font-size:13px;font-weight:700;flex-shrink:0;line-height:1}
 #sb-params-back:hover{border-color:var(--text);color:var(--text)}
 #sb-params-title{flex:1;font-size:13px;font-weight:800;color:var(--text2)}
-#sb-params-start{padding:4px 10px;border-radius:6px;border:1px solid var(--green);background:var(--green-bg);color:var(--green-lt);cursor:pointer;font-size:11px;font-weight:700;flex-shrink:0}
-#sb-params-start:disabled{opacity:.35;pointer-events:none}
+#sb-params-save,#sb-params-play{padding:4px 8px;border-radius:6px;border:1px solid var(--border2);background:var(--panel2);color:var(--dim);cursor:pointer;font-size:13px;font-weight:700;flex-shrink:0}
+#sb-params-play{border-color:var(--green);background:var(--green-bg);color:var(--green-lt)}
+#sb-params-play:disabled{opacity:.35;pointer-events:none}
 #sb-params-body{flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:10px}
 .param-row{display:flex;flex-direction:column;gap:4px}
 .param-lbl{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--dim)}
@@ -219,7 +220,8 @@ html,body{height:100%;width:100%;background:var(--bg2);color:var(--text);
       <div id="sb-params-topbar">
         <button id="sb-params-back" onclick="goHome()">←</button>
         <span id="sb-params-title">—</span>
-        <button id="sb-params-start" onclick="startRep()" disabled>▶ Start</button>
+        <button id="sb-params-save" onclick="saveParamsAndGoHome()" title="Save and return">💾</button>
+        <button id="sb-params-play" onclick="startRep()" disabled title="Start session">▶</button>
       </div>
       <div id="sb-params-body">
         <div class="param-row">
@@ -1033,29 +1035,40 @@ function runOpponent(delay) {
 
 // ── Prefix autoplay (practice mode: replay shared prefix with prev line) ──
 function autoplayPrefix(moves, prevMoves, onDone) {
-  // Find length of common prefix
+  // Find length of common prefix between new line and previous line
   var prefixLen = 0;
   for (var i = 0; i < Math.min(moves.length, prevMoves.length); i++) {
-    if (moves[i].from === prevMoves[i].from && moves[i].to === prevMoves[i].to) prefixLen = i + 1;
-    else break;
+    if (moves[i].from === prevMoves[i].from && moves[i].to === prevMoves[i].to) {
+      prefixLen = i + 1;
+    } else {
+      break;
+    }
   }
   if (prefixLen === 0) { onDone(); return; }
+  // Reset engine and replay prefix from scratch
+  chessEngine = newChess();
+  S.fen = chessEngine.fen();
+  S.moveIdx = 0;
+  board.setPosition(S.fen, false);
   var step = 0;
   function playStep() {
-    if (step >= prefixLen || S.busy) { onDone(); return; }
-    // Only autoplay opponent moves (book moves the player would play are shown but not automated)
+    if (step >= prefixLen) {
+      updateStatusBar(); updateMovelist();
+      onDone();
+      return;
+    }
     var m = moves[step];
     chessEngine.move({from:m.from, to:m.to, promotion:m.promo.toLowerCase()||undefined});
-    S.fen = chessEngine.fen(); S.moveIdx = step + 1;
+    S.fen = chessEngine.fen();
+    S.moveIdx = step + 1;
     playSound("move");
     board.setPosition(S.fen, true);
     updateStatusBar(); updateMovelist();
     step++;
-    // Check if line done mid-prefix
     if (S.moveIdx >= moves.length) { finishLine(); return; }
     setTimeout(playStep, 200);
   }
-  setTimeout(playStep, 80);
+  setTimeout(playStep, 100);
 }
 
 // ── Select a game (line) ──────────────────────────────────────────
@@ -1221,8 +1234,7 @@ function exitTraining() {
 }
 
 // ── Start training ────────────────────────────────────────────────
-function startRep() {
-  var id = _currentSlot;
+function startRepById(id) {
   var pgn = getPgn(id);
   if (!pgn) return;
   var params = getParams(id);
@@ -1232,6 +1244,7 @@ function startRep() {
     if (!games.length) return;
   } catch(e) { return; }
 
+  _currentSlot = id;
   S.games = games;
   S.gameIdx = -1;
   S.playerColor = params.color;
@@ -1246,15 +1259,23 @@ function startRep() {
     S.drillQueue = shuffle(games.map(function(_,i){return i;}));
   } else {
     S.drillQueue = games.map(function(_,i){return i;});
-    S.drillQueue.shift(); // first game selected directly
+    S.drillQueue.shift(); // first game selected directly below
   }
 
   updateScores(); updateProgress();
   goActive();
-  // Show score/progress in status bar
   document.getElementById("status-score").style.display = "";
   document.getElementById("status-prog-wrap").style.display = "";
   selectGame(S.mode === "drill" ? S.drillQueue.shift() : 0, false);
+}
+
+function startRep() {
+  startRepById(_currentSlot);
+}
+
+function saveParamsAndGoHome() {
+  // Params already saved on input — just navigate back
+  goHome();
 }
 
 // ── Navigation ────────────────────────────────────────────────────
@@ -1401,17 +1422,8 @@ function goActive() {
 
 // ── Select a slot (from home grid) ───────────────────────────────
 function selectSlot(id) {
-  var def = SLOT_DEFAULTS.find(function(s){ return s.id === id; });
-  if (def && def.name === "—") return;
   _currentSlot = id;
   setImportStatus("");
-  // If a PGN was loaded from the home panel, auto-assign it
-  if (window._pendingHomePgn) {
-    setPgn(id, window._pendingHomePgn);
-    window._pendingHomePgn = null;
-    window._pendingHomeLabel = null;
-    setHomeLoadStatus("");
-  }
   document.getElementById("sb-home").style.display = "none";
   document.getElementById("sb-params").style.display = "flex";
   refreshParamsUI();
@@ -1430,7 +1442,7 @@ function refreshParamsUI() {
   document.getElementById("pbtn-practice").className = "param-btn" + (!p.drill ? " active-practice" : "");
   document.getElementById("pbtn-drill").className = "param-btn" + (p.drill ? " active-drill" : "");
   // Start button
-  document.getElementById("sb-params-start").disabled = !hasContent(_currentSlot);
+  document.getElementById("sb-params-play").disabled = !hasContent(_currentSlot);
 }
 
 function saveParam(key, val) {
@@ -1453,28 +1465,25 @@ function renderHomeGrid() {
     btn.className = "rep-home-btn" + (isEmpty ? " empty" : "") +
       (!isEmpty && p.color === "white" ? " color-white" : "") +
       (!isEmpty && p.color === "black" ? " color-black" : "");
-    if (!isEmpty) btn.onclick = function() { selectSlot(def.id); };
+    // Empty slots open params to configure; filled slots start training
+    btn.onclick = (function(id, empty) {
+      return function() {
+        if (empty) {
+          // Open params panel to configure this empty slot
+          _currentSlot = id;
+          setImportStatus("");
+          document.getElementById("sb-home").style.display = "none";
+          document.getElementById("sb-params").style.display = "flex";
+          refreshParamsUI();
+        } else {
+          startRepById(id);
+        }
+      };
+    })(def.id, isEmpty);
     var nameEl = document.createElement("div");
     nameEl.className = "rep-home-name";
     nameEl.textContent = isEmpty ? "+" : p.name;
     btn.appendChild(nameEl);
-    if (!isEmpty) {
-      var descEl = document.createElement("div");
-      descEl.className = "rep-home-desc";
-      descEl.textContent = p.desc;
-      btn.appendChild(descEl);
-      var tag = document.createElement("div");
-      tag.className = "rep-home-tag " + (p.color === "white" ? "tag-w" : "tag-b");
-      tag.textContent = p.color === "white" ? "♔ W" : "♚ B";
-      btn.appendChild(tag);
-      if (p.drill) {
-        var dt = document.createElement("div");
-        dt.className = "rep-home-tag tag-drill";
-        dt.style.marginTop = "1px";
-        dt.textContent = "Drill";
-        btn.appendChild(dt);
-      }
-    }
     grid.appendChild(btn);
   });
 }
@@ -1509,11 +1518,25 @@ function homeImportPgn(text, label) {
   try {
     var games = parsePgn(text);
     if (!games.length) { setHomeLoadStatus("No valid moves found", "err"); return; }
-    // Store temporarily; user must select a slot to assign it
-    window._pendingHomePgn = text;
-    window._pendingHomeLabel = label;
-    setHomeLoadStatus("✓ " + games.length + " line(s) loaded — select a repertoire slot to assign it", "ok");
-    renderHomeGrid();
+    // Start a practice session directly with no slot
+    _currentSlot = null;
+    S.games = games;
+    S.gameIdx = -1;
+    S.playerColor = "white";
+    S.mode = "practice";
+    S.scoreClean = 0; S.scoreTotal = 0;
+    S.erroredLines = new Set();
+    S.drillDone = new Set();
+    S.errorPassOnly = false;
+    S.drillQueue = games.map(function(_,i){return i;});
+    S.drillQueue.shift();
+    updateScores(); updateProgress();
+    goActive();
+    document.getElementById("sb-active-repname").textContent = label.replace(/\.(pgn|txt)$/i,"");
+    document.getElementById("status-score").style.display = "";
+    document.getElementById("status-prog-wrap").style.display = "";
+    setHomeLoadStatus("");
+    selectGame(0, false);
   } catch(err) {
     setHomeLoadStatus("Error: " + err.message, "err");
   }
