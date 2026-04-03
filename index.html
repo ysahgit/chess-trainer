@@ -148,7 +148,9 @@ html,body{height:100%;width:100%;background:var(--bg2);color:var(--text);
 .cm-chessboard .coordinates .coordinate{fill:#6b6f82!important;font-size:11px}
 
 /* ── Status bar ── */
-#bot-strip{display:flex;align-items:center;gap:6px;background:var(--panel);border-radius:10px;
+#mobile-exit-btn{display:none;padding:4px 10px;border-radius:6px;border:1px solid var(--border2);
+  background:var(--panel2);color:var(--dim);cursor:pointer;font-size:11px;font-weight:700;
+  align-self:flex-start;flex-shrink:0}border-radius:10px;
   padding:6px 10px;border:1px solid var(--border2);flex-shrink:0;min-height:36px}
 #bot-strip.s-correct{border-color:var(--green);background:var(--green-bg)}
 #bot-strip.s-wrong{border-color:var(--red);background:var(--red-bg)}
@@ -200,6 +202,7 @@ html,body{height:100%;width:100%;background:var(--bg2);color:var(--text);
   /* Hide sidebar when training is active */
   body.training #sidebar{display:none}
   body.training #main{order:1;height:100%}
+  body.training #mobile-exit-btn{display:block}
   html,body{overflow:hidden}
 }
 /* ── Mobile: landscape ── */
@@ -218,6 +221,7 @@ html,body{height:100%;width:100%;background:var(--bg2);color:var(--text);
   #trainer{gap:4px;padding:4px 0}
   #board-container{flex-shrink:0!important}
   #bot-strip{width:var(--board-size,400px)!important;flex-shrink:0!important}
+  #mobile-exit-btn{display:none!important} /* sidebar visible in landscape, use its back btn */
   html,body{overflow:hidden}
 }
 </style>
@@ -319,6 +323,7 @@ html,body{height:100%;width:100%;background:var(--bg2);color:var(--text);
       <p style="color:var(--dim);font-size:13px">Select a repertoire to begin</p>
     </div>
     <div id="trainer" style="display:none">
+      <div id="mobile-exit-btn" onclick="goHome()">← Exit</div>
       <div id="board-container"></div>
       <div id="bot-strip">
         <div id="status-left">
