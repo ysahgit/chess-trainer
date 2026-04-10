@@ -44,7 +44,7 @@ html,body{height:100%;width:100%;background:var(--bg2);color:var(--text);
   display:flex;flex-direction:column;overflow:hidden}
 
 /* ── HOME panel ── */
-#sb-home{display:flex;flex-direction:column;height:100%;overflow:hidden}
+#sb-home{display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden}
 .sb-logo{padding:10px 14px 9px;display:flex;align-items:center;gap:9px;border-bottom:1px solid var(--border);flex-shrink:0}
 .sb-logo-icon{width:30px;height:30px;border-radius:7px;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
 .sb-logo-name{font-size:14px;font-weight:800;color:var(--text2)}.sb-logo-sub{font-size:10px;color:var(--dim)}
@@ -74,7 +74,7 @@ html,body{height:100%;width:100%;background:var(--bg2);color:var(--text);
 .tag-practice{background:var(--green-bg);color:var(--green-lt);border:1px solid rgba(95,158,67,.35)}
 
 /* ── PARAMS panel ── */
-#sb-params{display:none;flex-direction:column;height:100%;overflow:hidden}
+#sb-params{display:none;flex-direction:column;flex:1;min-height:0;overflow:hidden}
 #sb-params-topbar{display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid var(--border);flex-shrink:0}
 #sb-params-back{padding:4px 8px;border-radius:6px;border:1px solid var(--border2);background:var(--panel2);color:var(--dim);cursor:pointer;font-size:13px;font-weight:700;flex-shrink:0;line-height:1}
 #sb-params-back:hover{border-color:var(--text);color:var(--text)}
@@ -95,7 +95,6 @@ html,body{height:100%;width:100%;background:var(--bg2);color:var(--text);
 .param-btn.active-b{border-color:rgba(120,120,170,.6);color:#9898c8;background:var(--black-rep)}
 .param-btn.active-drill{border-color:var(--gold);color:var(--gold-lt);background:var(--gold-bg)}
 .param-btn.active-practice{border-color:var(--green);color:var(--green-lt);background:var(--green-bg)}
-#sb-params-footer{padding:10px 12px;border-top:1px solid var(--border);flex-shrink:0;display:flex;flex-direction:column;gap:6px}
 .load-status{font-size:10px;color:var(--dim);min-height:14px}
 .load-status.ok{color:var(--green-lt)}
 .load-status.err{color:var(--red-lt)}
@@ -112,7 +111,7 @@ html,body{height:100%;width:100%;background:var(--bg2);color:var(--text);
 .load-sub-btn:hover{border-color:var(--blue);color:var(--blue)}
 
 /* ── ACTIVE panel ── */
-#sb-active{display:none;flex-direction:column;height:100%;overflow:hidden}
+#sb-active{display:none;flex-direction:column;flex:1;min-height:0;overflow:hidden}
 #sb-active-topbar{display:flex;align-items:center;gap:6px;padding:8px 10px;border-bottom:1px solid var(--border);flex-shrink:0}
 #sb-active-back{padding:4px 8px;border-radius:6px;border:1px solid var(--border2);background:var(--panel2);color:var(--dim);cursor:pointer;font-size:13px;font-weight:700;flex-shrink:0;line-height:1}
 #sb-active-back:hover{border-color:var(--text);color:var(--text)}
@@ -151,7 +150,8 @@ html,body{height:100%;width:100%;background:var(--bg2);color:var(--text);
 .cm-chessboard .coordinates .coordinate{fill:#6b6f82!important;font-size:11px}
 
 /* ── Status bar ── */
-#mobile-exit-btn{display:none;gap:6px;align-self:stretch;flex-shrink:0}border-radius:10px;
+#mobile-exit-btn{display:none;gap:6px;align-self:stretch;flex-shrink:0}
+#bot-strip{display:flex;align-items:center;gap:6px;background:var(--panel);border-radius:10px;
   padding:6px 10px;border:1px solid var(--border2);flex-shrink:0;min-height:36px}
 #bot-strip.s-correct{border-color:var(--green);background:var(--green-bg)}
 #bot-strip.s-wrong{border-color:var(--red);background:var(--red-bg)}
@@ -160,7 +160,7 @@ html,body{height:100%;width:100%;background:var(--bg2);color:var(--text);
 #status-left{flex:1;display:flex;align-items:center;gap:6px;min-width:0;overflow:hidden}
 #status-line-num{font-size:11px;font-weight:800;color:var(--dim);white-space:nowrap;flex-shrink:0}
 #status-annotation{font-size:11px;color:var(--text2);font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#status-right{display:flex;align-items:center;gap:5px;flex-shrink:0}
+#status-right{display:flex;align-items:center;gap:5px;flex-shrink:0;margin-left:auto}
 #status-score{font-size:11px;font-weight:700;color:var(--text2);white-space:nowrap}
 #status-prog-wrap{width:60px;height:4px;background:var(--bg2);border-radius:3px;overflow:hidden;flex-shrink:0}
 #status-prog-fill{height:100%;background:var(--green-lt);border-radius:3px;transition:width .3s;width:0%}
@@ -169,6 +169,10 @@ html,body{height:100%;width:100%;background:var(--bg2);color:var(--text);
 .ctrl-btn:hover{border-color:var(--blue);color:var(--blue)}
 .ctrl-btn:disabled{opacity:.3;pointer-events:none}
 .ctrl-btn.g{border-color:var(--green);color:var(--green-lt);background:var(--green-bg)}
+@media(max-width:900px){
+  #btn-next{padding:6px 16px;font-size:16px;margin-left:4px}
+  #status-right{gap:3px}
+}
 
 /* ── Drill end modal ── */
 #drill-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:3000;align-items:center;justify-content:center}
@@ -257,6 +261,7 @@ html,body{height:100%;width:100%;background:var(--bg2);color:var(--text);
       <div id="sb-params-topbar">
         <button id="sb-params-back" onclick="goHome()">←</button>
         <span id="sb-params-title">—</span>
+        <button id="sb-params-export" onclick="exportHtml()" title="Export HTML with all repertoires baked in" style="padding:4px 8px;border-radius:6px;border:1px solid var(--border2);background:var(--panel2);color:var(--dim);cursor:pointer;font-size:11px;font-weight:700;flex-shrink:0">⬇ Export</button>
         <button id="sb-params-save" onclick="saveParamsAndGoHome()" title="Save and return">💾</button>
         <button id="sb-params-play" onclick="startRep()" disabled title="Start session">▶</button>
       </div>
@@ -283,24 +288,26 @@ html,body{height:100%;width:100%;background:var(--bg2);color:var(--text);
             <button class="param-btn" id="pbtn-drill" onclick="saveParam('drill',true)">🎯 Drill</button>
           </div>
         </div>
-      </div>
-      <div id="sb-params-footer">
-        <div class="param-lbl" style="padding:0 0 4px">Import PGN</div>
-        <div id="import-lock">
-          <input id="import-pin" type="password" inputmode="numeric" maxlength="8"
-            placeholder="Enter code to unlock"
-            style="width:100%;padding:6px 10px;background:var(--bg2);border:1px solid var(--border);
-            border-radius:7px;color:var(--text);font-size:12px;outline:none;font-family:monospace"
-            oninput="checkImportPin(this.value)" autocomplete="off">
-          <div id="import-pin-status" class="load-status" style="margin-top:2px"></div>
+        <div style="border-top:1px solid var(--border);margin:4px -12px 0;padding:10px 12px 0;display:flex;flex-direction:column;gap:6px">
+          <div class="param-lbl">Import PGN</div>
+          <div id="import-lock">
+            <button id="import-hold-btn"
+              onmousedown="startImportHold()" onmouseup="cancelImportHold()" onmouseleave="cancelImportHold()"
+              ontouchstart="startImportHold(event)" ontouchend="cancelImportHold()" ontouchcancel="cancelImportHold()"
+              style="width:100%;padding:7px;border-radius:8px;border:1px solid var(--border2);background:var(--panel2);color:var(--dim);cursor:pointer;font-size:11px;font-weight:700;position:relative;overflow:hidden;user-select:none">
+              <span id="import-hold-label">Hold to unlock import</span>
+              <div id="import-hold-bar" style="position:absolute;left:0;top:0;height:100%;width:0%;background:rgba(212,160,23,.25);transition:none;pointer-events:none"></div>
+            </button>
+            <div id="import-pin-status" class="load-status" style="margin-top:2px"></div>
+          </div>
+          <div id="import-controls" style="display:none;flex-direction:column;gap:6px">
+            <input type="file" id="import-file-input" accept=".pgn,.txt" style="position:absolute;opacity:0;width:0;height:0">
+            <label for="import-file-input" class="load-btn">📂 Open file</label>
+            <textarea class="pgn-paste" id="params-paste-area" placeholder="…or paste PGN here" spellcheck="false"></textarea>
+            <button class="load-sub-btn" onclick="paramsLoadFromPaste()">↳ Load pasted text</button>
+          </div>
+          <div id="import-status" class="load-status"></div>
         </div>
-        <div id="import-controls" style="display:none;flex-direction:column;gap:6px">
-          <input type="file" id="import-file-input" accept=".pgn,.txt" style="position:absolute;opacity:0;width:0;height:0">
-          <label for="import-file-input" class="load-btn">📂 Open file</label>
-          <textarea class="pgn-paste" id="params-paste-area" placeholder="…or paste PGN here" spellcheck="false"></textarea>
-          <button class="load-sub-btn" onclick="paramsLoadFromPaste()">↳ Load pasted text</button>
-        </div>
-        <div id="import-status" class="load-status"></div>
       </div>
     </div>
 
@@ -311,6 +318,7 @@ html,body{height:100%;width:100%;background:var(--bg2);color:var(--text);
         <span id="sb-active-repname">—</span>
         <button id="sb-active-settings" onclick="goParams()" title="Settings" style="padding:4px 7px;border-radius:6px;border:1px solid var(--border2);background:var(--panel2);color:var(--dim);cursor:pointer;font-size:12px;flex-shrink:0">⚙</button>
       </div>
+      <div id="sb-active-reptitle" style="padding:4px 12px 5px;font-size:10px;color:var(--dim);font-style:italic;border-bottom:1px solid var(--border);flex-shrink:0;display:none"></div>
       <div class="sb-scores">
         <div class="sbs c"><span class="v" id="sc-clean">0</span><span class="l">Clean</span></div>
         <div class="sbs w"><span class="v" id="sc-err">0</span><span class="l">Errors</span></div>
@@ -888,7 +896,8 @@ var S = {
   mode: "practice",      // "practice" | "drill"
   drillQueue: [], drillDone: new Set(),
   prevMoves: [],         // moves from previous line for autoplay prefix
-  errorPassOnly: false   // true when replaying errored lines only
+  errorPassOnly: false,  // true when replaying errored lines only
+  repTitle: ""           // overall repertoire description from first # line
 };
 
 // ── Chess.js helper ───────────────────────────────────────────────
@@ -916,7 +925,7 @@ function parsePgn(text) {
       if (currentName && currentMoves.length) {
         var moveText = currentMoves.join(" ").trim();
         var g = parseMoveText(moveText, currentName);
-        if (g && g.moves.length) games.push(g);
+        if (g && g.moves.length) { g.desc = currentName; games.push(g); }
       }
       currentName = ""; currentMoves = [];
     }
@@ -944,8 +953,8 @@ function parsePgn(text) {
           if (!sectionTitle && games.length === 0 && !currentName) {
             sectionTitle = label;
           } else {
-            currentName = (sectionTitle ? sectionTitle + " | " : "") + label;
-          }
+            currentName = label;
+        }
         }
       } else if (/\d+\./.test(line)) {
         // move line
@@ -953,7 +962,7 @@ function parsePgn(text) {
       }
     }
     flushLine();
-    if (games.length) return games;
+    if (games.length) { games.repTitle = sectionTitle; return games; }
   }
 
   // ── Format 2: standard PGN with [Event] headers ───────────────
@@ -1317,6 +1326,7 @@ function startRepById(id) {
 
   _currentSlot = id;
   S.games = games;
+  S.repTitle = games.repTitle || "";
   S.gameIdx = -1;
   S.playerColor = params.color;
   S.mode = params.drill ? "drill" : "practice";
@@ -1418,13 +1428,15 @@ function flipBoard() {
 function updateStatusBar() {
   var lineNum = S.gameIdx >= 0 ? (S.gameIdx + 1) + "/" + S.games.length : "—";
   document.getElementById("status-line-num").textContent = lineNum;
-  // Show current annotation if any
+  // Per-line description: use game.desc (the # header above the line)
   var ann = "";
-  if (S.moveIdx > 0 && S.moveIdx <= S.moves.length) {
-    ann = S.moves[S.moveIdx - 1].comment || "";
+  if (S.gameIdx >= 0 && S.games[S.gameIdx]) {
+    ann = S.games[S.gameIdx].desc || S.games[S.gameIdx].name || "";
   }
-  if (!ann && S.gameIdx >= 0 && S.games[S.gameIdx]) {
-    ann = S.games[S.gameIdx].name || "";
+  // Override with move annotation if present
+  if (S.moveIdx > 0 && S.moveIdx <= S.moves.length) {
+    var moveComment = S.moves[S.moveIdx - 1].comment || "";
+    if (moveComment) ann = moveComment;
   }
   document.getElementById("status-annotation").textContent = ann;
 }
@@ -1494,6 +1506,13 @@ function goActive() {
   document.getElementById("sb-home").style.display = "none";
   document.getElementById("sb-active").style.display = "flex";
   document.getElementById("sb-active-repname").textContent = _currentSlot ? getParams(_currentSlot).name : "—";
+  var titleEl = document.getElementById("sb-active-reptitle");
+  if (S.repTitle) {
+    titleEl.textContent = S.repTitle;
+    titleEl.style.display = "block";
+  } else {
+    titleEl.style.display = "none";
+  }
 }
 
 // ── Select a slot (from home grid) ───────────────────────────────
@@ -1572,28 +1591,57 @@ function renderHomeGrid() {
   });
 }
 
-var IMPORT_PIN = "1277";
+var IMPORT_HOLD_MS = 3000;
+var _importHoldTimer = null;
+var _importHoldStart = null;
+var _importHoldRaf = null;
 
-function checkImportPin(val) {
-  if (val === IMPORT_PIN) {
-    document.getElementById("import-lock").style.display = "none";
-    document.getElementById("import-controls").style.display = "flex";
-    document.getElementById("import-pin-status").textContent = "";
-    setImportStatus("");
-  } else if (val.length >= IMPORT_PIN.length) {
-    document.getElementById("import-pin-status").textContent = "Incorrect code";
-    document.getElementById("import-pin-status").className = "load-status err";
-    document.getElementById("import-pin").value = "";
+function startImportHold(e) {
+  if (e) e.preventDefault();
+  _importHoldStart = Date.now();
+  var bar = document.getElementById("import-hold-bar");
+  var lbl = document.getElementById("import-hold-label");
+  bar.style.transition = "none";
+  bar.style.width = "0%";
+
+  function tick() {
+    var elapsed = Date.now() - _importHoldStart;
+    var pct = Math.min(100, elapsed / IMPORT_HOLD_MS * 100);
+    bar.style.width = pct + "%";
+    if (pct < 100) {
+      _importHoldRaf = requestAnimationFrame(tick);
+    } else {
+      unlockImport();
+    }
   }
+  _importHoldRaf = requestAnimationFrame(tick);
+}
+
+function cancelImportHold() {
+  if (_importHoldRaf) { cancelAnimationFrame(_importHoldRaf); _importHoldRaf = null; }
+  _importHoldStart = null;
+  var bar = document.getElementById("import-hold-bar");
+  if (bar) { bar.style.transition = "width .2s"; bar.style.width = "0%"; }
+}
+
+function unlockImport() {
+  cancelImportHold();
+  document.getElementById("import-lock").style.display = "none";
+  document.getElementById("import-controls").style.display = "flex";
+  var status = document.getElementById("import-pin-status");
+  if (status) status.textContent = "";
+  setImportStatus("");
 }
 
 function resetImportLock() {
   document.getElementById("import-lock").style.display = "";
   document.getElementById("import-controls").style.display = "none";
-  document.getElementById("import-pin").value = "";
-  document.getElementById("import-pin-status").textContent = "";
-  document.getElementById("import-pin-status").className = "load-status";
+  var bar = document.getElementById("import-hold-bar");
+  if (bar) { bar.style.transition = "none"; bar.style.width = "0%"; }
+  var status = document.getElementById("import-pin-status");
+  if (status) { status.textContent = ""; status.className = "load-status"; }
   setImportStatus("");
+  cancelImportHold();
 }
 function setImportStatus(msg, type) {
   var el = document.getElementById("import-status");
@@ -1627,6 +1675,7 @@ function homeImportPgn(text, label) {
     // Start a practice session directly with no slot
     _currentSlot = null;
     S.games = games;
+    S.repTitle = games.repTitle || "";
     S.gameIdx = -1;
     S.playerColor = "white";
     S.mode = "practice";
@@ -1680,6 +1729,72 @@ function homeLoadFromPaste() {
   if (!text) { setHomeLoadStatus("Paste PGN text first", "err"); return; }
   homeImportPgn(text, "pasted text");
   document.getElementById("home-paste-area").value = "";
+}
+
+// ── Export HTML ───────────────────────────────────────────────────
+function exportHtml() {
+  // Fetch the current HTML source
+  fetch(window.location.href)
+    .then(function(r) { return r.text(); })
+    .then(function(html) {
+      // Build merged BUILTIN_REPS: start with hardcoded, overlay localStorage overrides
+      var merged = {};
+      // Copy all hardcoded reps
+      Object.keys(BUILTIN_REPS).forEach(function(k) { merged[k] = BUILTIN_REPS[k]; });
+      // Overlay any localStorage PGN overrides (including user-imported slots)
+      try {
+        var stored = JSON.parse(localStorage.getItem(PGN_KEY) || "{}");
+        Object.keys(stored).forEach(function(k) { if (stored[k]) merged[k] = stored[k]; });
+      } catch(e) {}
+
+      // Serialize merged BUILTIN_REPS as a JS object with backtick template literals
+      var lines = ["var BUILTIN_REPS = {"];
+      var keys = Object.keys(merged);
+      keys.forEach(function(k, i) {
+        // Escape backticks in the PGN content
+        var safe = merged[k].replace(/`/g, "\\`").replace(/\${/g, "\\${");
+        lines.push("  " + JSON.stringify(k) + ": `" + safe + "`" + (i < keys.length - 1 ? "," : ""));
+      });
+      lines.push("};");
+      var newBlock = lines.join("\n");
+
+      // Build merged SLOT_DEFAULTS with current params
+      var paramLines = ["var SLOT_DEFAULTS = ["];
+      var paramAll = {};
+      try { paramAll = JSON.parse(localStorage.getItem(PARAMS_KEY) || "{}"); } catch(e) {}
+      SLOT_DEFAULTS.forEach(function(def, i) {
+        var p = paramAll[def.id] || def;
+        var entry = "  {id:" + JSON.stringify(def.id) +
+          ", name:" + JSON.stringify(p.name) +
+          ", desc:" + JSON.stringify(p.desc) +
+          ", color:" + JSON.stringify(p.color) +
+          ", drill:" + (p.drill ? "true" : "false") + "}";
+        paramLines.push(entry + (i < SLOT_DEFAULTS.length - 1 ? "," : ""));
+      });
+      paramLines.push("];");
+      var newSlots = paramLines.join("\n");
+
+      // Replace BUILTIN_REPS block in HTML
+      var builtinRe = /var BUILTIN_REPS = \{[\s\S]*?\n\};/;
+      html = html.replace(builtinRe, newBlock);
+
+      // Replace SLOT_DEFAULTS block in HTML
+      var slotsRe = /var SLOT_DEFAULTS = \[[\s\S]*?\];/;
+      html = html.replace(slotsRe, newSlots);
+
+      // Trigger download
+      var blob = new Blob([html], {type: "text/html;charset=utf-8"});
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url;
+      a.download = "chess-trainer.html";
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function() { document.body.removeChild(a); URL.revokeObjectURL(url); }, 1000);
+    })
+    .catch(function(err) {
+      alert("Export failed: " + err.message + "\n\nNote: export requires serving via http:// (not file://)");
+    });
 }
 
 // ── Helpers ───────────────────────────────────────────────────────
