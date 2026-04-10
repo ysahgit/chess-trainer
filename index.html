@@ -464,7 +464,7 @@ function handleMoveInput(event) {
 // ── Built-in rep defaults ─────────────────────────────────────────
 var BUILTIN_REPS = {
 
-  "JBV": `#1 🎯 Queen Bait
+  "slot1": `#1 🎯 Queen Bait
 1. d4 d5 2. Nc3 Nf6 3. Bf4 Nc6 4. Nb5 e5 5. Bxe5 Nxe5 6. dxe5 Ne4 7. Qxd5 Qxd5 8. Nxc7+ Kd7 9. Nxd5
 #2 🎯 Rook Heist
 1. d4 d5 2. Nc3 Nf6 3. Bf4 Nc6 4. Nb5 e6 5. Nxc7+ Kd7 6. Nxa8
@@ -516,7 +516,7 @@ var BUILTIN_REPS = {
 1. d4 d5 2. Nc3 Nf6 3. Bf4 e6 4. Nb5 Bd6 5. Nxd6+ cxd6 6. e3 Nc6 7. Nf3 O-O 8. c3 Re8 9. Be2 e5 10. Bg5
 #26 🎯 Safe Harbor
 1. d4 d5 2. Nc3 Nf6 3. Bf4 Bf5 4. f3 e6 5. g4 Bg6 6. h4 h6 7. e3 Bd6 8. Nh3 Nc6 9. Bd3 Bxd3 10. Qxd3 Bxf4 11. Nxf4 Qd6 12. O-O-O`,
-  "JSL": `# Jobava London sidelines | Chessreps Opening Trainer
+  "slot2": `# Jobava London sidelines | Chessreps Opening Trainer
 #1 🎯 Unnamed Line
 1. d4 c5 2. d5 e6 3. e4 Nf6 4. Nc3
 #2 🎯 Unnamed Line
@@ -581,7 +581,7 @@ var BUILTIN_REPS = {
 1. d4 e5 2. dxe5 Nc6 3. Nf3 Qe7 4. Bf4 Qb4+ 5. Bd2 Qxb2 6. Nc3 Bb4 7. Rb1 Qa3 8. Nd5
 #32 🎯 Unnamed Line
 1. d4 g6 2. e4 Bg7 3. Nc3 d5 4. exd5 Nf6 5. Bc4`,
-  "Scam": `# Modern scandinavian | Chessreps Opening Trainer
+  "slot3": `# Modern scandinavian | Chessreps Opening Trainer
 #1 🎯 Intro
 1. e4 d5 2. exd5 Nf6 3. Nc3 Nxd5 4. Nxd5 Qxd5 5. Nf3 Nc6 6. Be2 Bg4 7. O-O O-O-O 8. d3 e5
 #2 🎯 Scandinavian defence : Modern variation Line 2
@@ -698,7 +698,7 @@ var BUILTIN_REPS = {
 1. e4 d5 2. exd5 Nf6 3. Bb5+ Nbd7 4. c4 a6 5. Ba4 b5
 #58 🎯 Scandinavian defence : Modern variation Line 53
 1. e4 d5 2. exd5 Nf6 3. d6 Qxd6`,
-  "QGA": `# Queen's Gambit Accepted | Chessreps Opening Trainer
+  "slot4": `# Queen's Gambit Accepted | Chessreps Opening Trainer
 #1 🎯 Knight's Gambit
 1. d4 d5 2. c4 dxc4 3. e4 b5 4. a4 c6 5. axb5 cxb5 6. Nc3 Bd7 7. d5 e6 8. dxe6 fxe6 9. Nxb5 Bxb5 10. Qh5+ g6 11. Qxb5+
 #2 🎯 Rook Heist
@@ -731,7 +731,7 @@ var BUILTIN_REPS = {
 1. d4 d5 2. c4 dxc4 3. e4 e6 4. Bxc4 Nf6 5. Nc3 Bb4 6. e5 Nd5 7. Ne2 O-O 8. O-O
 #16 🎯 Quiet Storm
 1. d4 d5 2. c4 dxc4 3. e4 e5 4. Nf3 exd4 5. Bxc4 Nc6 6. O-O Be6 7. Nbd2 Bxc4 8. Nxc4`,
-  "QGD": `# Queen's Gambit Declined | Chessreps Opening Trainer
+  "slot5": `# Queen's Gambit Declined | Chessreps Opening Trainer
 #1 🎯 Forking Queen
 1. d4 d5 2. c4 e6 3. Nc3 Bb4 4. e3 Nf6 5. a3 Bxc3+ 6. bxc3 O-O 7. cxd5 Nxd5 8. Bd3 Nxc3 9. Qc2 Nd5 10. Bxh7+ Kh8 11. Bd3
 #2 🎯 Tarrasch Trap
@@ -772,7 +772,7 @@ var BUILTIN_REPS = {
 1. d4 d5 2. c4 e6 3. Nc3 Bb4 4. e3 Nf6 5. a3 Bxc3+ 6. bxc3 O-O 7. cxd5 exd5 8. Bd3 c5 9. Ne2 Nc6 10. O-O
 #20 🎯 Knight Prod
 1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. cxd5 exd5 5. Bg5 Be7 6. e3 O-O 7. Bd3 c6 8. Qc2 h6 9. Bh4 Nbd7 10. Nge2 Re8 11. O-O Ne4 12. Bxe7 Qxe7 13. Rae1 Ndf6 14. f3 Nxc3 15. Nxc3`,
-  "Caro": `# Caro-Kann | Chessreps Opening Trainer
+  "slot6": `# Caro-Kann | Chessreps Opening Trainer
 #1 🎯 Resilient Core
 1. e4 c6 2. d4 d5 3. e5 c5 4. dxc5 Nc6 5. a3 e6 6. b4 a5 7. b5 Nxe5 8. Bb2 f6 9. Bxe5 fxe5 10. Qh5+ g6 11. Qxe5 Nf6
 #2 🎯 King Hunt
@@ -833,14 +833,14 @@ var BUILTIN_REPS = {
 
 // ── Slot defaults (8 slots, 6 with PGN, 2 empty) ─────────────────
 var SLOT_DEFAULTS = [
-  {id:"JBV",   name:"JBV",  desc:"Jobava main lines",       color:"white", drill:false},
-  {id:"JSL",   name:"JSL",  desc:"Jobava sidelines",         color:"white", drill:false},
-  {id:"Scam",  name:"Scam", desc:"Modern Scandinavian",      color:"black", drill:false},
-  {id:"QGA",   name:"QGA",  desc:"Queen's Gambit Accepted", color:"black", drill:false},
-  {id:"QGD",   name:"QGD",  desc:"Queen's Gambit Declined", color:"black", drill:false},
-  {id:"Caro",  name:"Caro", desc:"Caro-Kann Defence",        color:"black", drill:false},
-  {id:"slot7", name:"—",    desc:"Empty slot",               color:"white", drill:false},
-  {id:"slot8", name:"—",    desc:"Empty slot",               color:"white", drill:false}
+  {id:"slot1", name:"JBV",  desc:"Jobava main lines",        color:"white", drill:false},
+  {id:"slot2", name:"JSL",  desc:"Jobava sidelines",          color:"white", drill:false},
+  {id:"slot3", name:"Scam", desc:"Modern Scandinavian",       color:"black", drill:false},
+  {id:"slot4", name:"QGA",  desc:"Queen's Gambit Accepted",  color:"black", drill:false},
+  {id:"slot5", name:"QGD",  desc:"Queen's Gambit Declined",  color:"black", drill:false},
+  {id:"slot6", name:"Caro", desc:"Caro-Kann Defence",         color:"black", drill:false},
+  {id:"slot7", name:"",     desc:"",                          color:"white", drill:false},
+  {id:"slot8", name:"",     desc:"",                          color:"white", drill:false}
 ];
 
 var PARAMS_KEY = "chess-trainer-params";   // {id: {name,desc,color,drill}}
@@ -1556,7 +1556,7 @@ function renderHomeGrid() {
   grid.innerHTML = "";
   SLOT_DEFAULTS.forEach(function(def) {
     var p = getParams(def.id);
-    var isEmpty = !hasContent(def.id) && def.name === "—";
+    var isEmpty = !hasContent(def.id);
     var btn = document.createElement("button");
     btn.className = "rep-home-btn" + (isEmpty ? " empty" : "") +
       (!isEmpty && p.color === "white" ? " color-white" : "") +
@@ -1564,7 +1564,7 @@ function renderHomeGrid() {
 
     var nameEl = document.createElement("span");
     nameEl.className = "rep-home-name";
-    nameEl.textContent = isEmpty ? "+" : p.name;
+    nameEl.textContent = (isEmpty || !p.name) ? "+" : p.name;
     btn.appendChild(nameEl);
 
     if (!isEmpty) {
