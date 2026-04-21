@@ -463,7 +463,6 @@ function handleMoveInput(event) {
 
 // ── Built-in rep defaults ─────────────────────────────────────────
 var BUILTIN_REPS = {
-
   "slot1": `#1 🎯 Queen Bait
 1. d4 d5 2. Nc3 Nf6 3. Bf4 Nc6 4. Nb5 e5 5. Bxe5 Nxe5 6. dxe5 Ne4 7. Qxd5 Qxd5 8. Nxc7+ Kd7 9. Nxd5
 #2 🎯 Rook Heist
@@ -829,18 +828,329 @@ var BUILTIN_REPS = {
 1. e4 c6 2. d4 d5 3. Nc3 dxe4 4. Nxe4 Nf6 5. Nxf6+ exf6 6. c3 Bd6 7. Bd3 O-O 8. Qc2 Re8+ 9. Ne2 h5 10. O-O h4 11. h3 Nd7 12. Be3 Nf8
 #28 📖 Knight Hop
 1. e4 c6 2. d4 d5 3. e5 c5 4. dxc5 Nc6 5. Bb5 e6 6. Be3 Ne7 7. c3 Nf5 8. Bd4 Bd7`,
+  "JBV": `# Jobava main lines
+#1 🎯 Queen Bait
+1. d4 d5 2. Nc3 Nf6 3. Bf4 Nc6 4. Nb5 e5 5. Bxe5 Nxe5 6. dxe5 Ne4 7. Qxd5 Qxd5 8. Nxc7+ Kd7 9. Nxd5
+#2 🎯 Rook Heist
+1. d4 d5 2. Nc3 Nf6 3. Bf4 Nc6 4. Nb5 e6 5. Nxc7+ Kd7 6. Nxa8
+#3 🎯 Fork Breaker
+1. d4 d5 2. Nc3 Nf6 3. Bf4 Nc6 4. Nb5 e5 5. Bxe5 Nxe5 6. dxe5 Nd7 7. Qxd5 c6 8. Nd6+ Bxd6 9. Qxd6
+#4 🎯 Central Pawn Grab
+1. d4 d5 2. Nc3 Nf6 3. Bf4 c5 4. e3 Nc6 5. Nb5 e5 6. Bxe5 Nxe5 7. dxe5 Nd7 8. Qxd5
+#5 🎯 Royal Fork Blitz
+1. d4 d5 2. Nc3 Nf6 3. Bf4 c5 4. e3 Nc6 5. Nb5 e5 6. Bxe5 Nxe5 7. dxe5 Ne4 8. Qxd5 Qxd5 9. Nc7+ Kd8 10. Nxd5
+#6 🎯 Knight Invasion
+1. d4 d5 2. Nc3 Nf6 3. Bf4 Bf5 4. f3 e6 5. g4 Bg6 6. h4 h6 7. e3 Bd6 8. Nh3 Bxf4 9. Nxf4 Bh7 10. g5 hxg5 11. hxg5 Nfd7 12. g6 fxg6 13. Nxe6 Qc8 14. Nxd5
+#7 🎯 Triple Fork Trap
+1. d4 d5 2. Nc3 Nf6 3. Bf4 c5 4. e3 Nc6 5. Nb5 e5 6. Bxe5 Nxe5 7. dxe5 Ng4 8. Qxd5 Qxd5 9. Nc7+ Kd8 10. Nxd5
+#8 🎯 Knight Shield
+1. d4 d5 2. Nc3 Nf6 3. Bf4 c5 4. e3 Nc6 5. Nb5 e5 6. Bxe5 Nxe5 7. dxe5 Ng4 8. Qxd5 Qa5+ 9. Nc3
+#9 🎯 B7 Plunder
+1. d4 d5 2. Nc3 Nf6 3. Bf4 c5 4. e3 Nc6 5. Nb5 e5 6. Bxe5 Nxe5 7. dxe5 Ne4 8. Qxd5 Qa5+ 9. c3 Bf5 10. Bc4 Bg6 11. Qxb7
+#10 🎯 Rook Pawn Raid
+1. d4 d5 2. Nc3 Nf6 3. Bf4 c5 4. e3 Nc6 5. Nb5 e5 6. Bxe5 Nxe5 7. dxe5 Ne4 8. Qxd5 Qa5+ 9. c3 Bf5 10. Bc4 Ng5 11. Qxb7
+#11 🎯 Queen Snatcher
+1. d4 d5 2. Nc3 Nf6 3. Bf4 e6 4. Nb5 Na6 5. e3 c6 6. Nc3 Nc7 7. Nf3 Bd6 8. Ne5 O-O 9. Bd3 c5 10. dxc5 Bxc5 11. Qf3 d4 12. exd4 Bxd4 13. O-O-O Bxc3 14. Bxh7+ Nxh7 15. Rxd8
+#12 🎯 H7 Sacrifice
+1. d4 d5 2. Nc3 Nf6 3. Bf4 e6 4. Nb5 Na6 5. e3 c6 6. Nc3 Nc7 7. Nf3 Bd6 8. Ne5 O-O 9. Bd3 c5 10. dxc5 Bxc5 11. Qf3 d4 12. exd4 Bxd4 13. O-O-O Ncd5 14. Bxh7+ Kxh7 15. Rxd4
+#13 🎯 Structure Crush
+1. d4 d5 2. Nc3 Nf6 3. Bf4 c5 4. e3 cxd4 5. exd4 a6 6. Nf3 Nc6 7. Ne5 Bf5 8. g4 Bg6 9. h4 h5 10. Nxg6 fxg6 11. g5
+#14 🎯 Bishop Cage
+1. d4 d5 2. Nc3 Nf6 3. Bf4 c5 4. e3 cxd4 5. exd4 a6 6. Nf3 Nc6 7. Ne5 Bf5 8. g4 Bg6 9. h4 Nxe5 10. dxe5 Ne4 11. Nxe4 Bxe4 12. f3
+#15 🎯 Queen's Perch
+1. d4 d5 2. Nc3 Nf6 3. Bf4 e6 4. Nb5 Na6 5. e3 c6 6. Nc3 Nc7 7. Nf3 Bd6 8. Ne5 O-O 9. Bd3 Bxe5 10. dxe5 Nd7 11. Qh5 g6 12. Qh6
+#16 🎯 Calm Defense
+1. d4 d5 2. Nc3 Nf6 3. Bf4 Bf5 4. f3 e6 5. g4 Bg6 6. h4 h5 7. g5 Nfd7 8. e3 c5 9. Nb5 Qa5+ 10. c3
+#17 🎯 Opposite Siege
+1. d4 d5 2. Nc3 Nf6 3. Bf4 c6 4. e3 Bf5 5. f3 e6 6. g4 Bg6 7. h4 h6 8. Bd3 Bxd3 9. Qxd3 Bd6 10. Nge2 O-O 11. O-O-O
+#18 🎯 C7 Pressure
+1. d4 d5 2. Nc3 Nf6 3. Bf4 Bf5 4. f3 e6 5. g4 Bg6 6. h4 h5 7. g5 Nfd7 8. e3 c5 9. Nb5 Na6 10. c3
+#19 🎯 Flank Ruin
+1. d4 d5 2. Nc3 Nf6 3. Bf4 e6 4. Nb5 Na6 5. e3 c6 6. Nc3 Bd6 7. Bxd6 Qxd6 8. Bxa6
+#20 🎯 Knight Advance
+1. d4 d5 2. Nc3 Nf6 3. Bf4 Bf5 4. f3 e6 5. g4 Bg6 6. h4 h5 7. g5 Nfd7 8. e3 Bd6 9. Bxd6 cxd6 10. Nh3 Nc6 11. Nf4
+#21 🎯 Pawn Splitter
+1. d4 d5 2. Nc3 Nf6 3. Bf4 e6 4. Nb5 Na6 5. e3 c6 6. Nc3 Bb4 7. Bxa6
+#22 🎯 Aggro Pawns
+1. d4 d5 2. Nc3 Nf6 3. Bf4 c5 4. e3 cxd4 5. exd4 a6 6. Nf3 Nc6 7. Ne5 Bf5 8. g4 Nxe5 9. gxf5 Nc6 10. Qd3
+#23 🎯 King's Flank Attack
+1. d4 d5 2. Nc3 Nf6 3. Bf4 c6 4. e3 Bf5 5. f3 e6 6. g4 Bg6 7. h4 h6 8. Bd3 Bxd3 9. Qxd3 Bd6 10. Nge2 Bxf4 11. Nxf4 Nbd7 12. O-O-O
+#24 🎯 Pawn Tsunami
+1. d4 d5 2. Nc3 Nf6 3. Bf4 c6 4. e3 Bf5 5. f3 e6 6. g4 Bg6 7. h4 h5 8. g5
+#25 🎯 Bishop Nab
+1. d4 d5 2. Nc3 Nf6 3. Bf4 e6 4. Nb5 Bd6 5. Nxd6+ cxd6 6. e3 Nc6 7. Nf3 O-O 8. c3 Re8 9. Be2 e5 10. Bg5
+#26 🎯 Safe Harbor
+1. d4 d5 2. Nc3 Nf6 3. Bf4 Bf5 4. f3 e6 5. g4 Bg6 6. h4 h6 7. e3 Bd6 8. Nh3 Nc6 9. Bd3 Bxd3 10. Qxd3 Bxf4 11. Nxf4 Qd6 12. O-O-O`,
+  "slot7": `# Queens gambit
+#1 Unnamed Line
+1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. cxd5 exd5 5. Bg5
+#2 Unnamed Line
+1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. cxd5 exd5 5. Bg5 Be7 6. e3 O-O 7. Bd3 c6 8. Qc2 h6 9. Bh4 Nbd7 10. Nge2 Re8 11. O-O Nf8 12. f3 Ne6 13. Rad1 Bd7 14. Bf2 Rc8 15. a3 a5 16. h3 Bd6 17. e4 dxe4 18. fxe4
+#3 Unnamed Line
+1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. cxd5 exd5 5. Bg5 Be7 6. e3 O-O 7. Bd3 c6 8. Qc2 h6 9. Bh4 Nbd7 10. Nge2 Re8 11. O-O Ne4 12. Bxe7 Qxe7 13. Rae1 Ndf6 14. f3 Nxc3 15. Nxc3 Qd6 16. Qf2 Bd7 17. h3 Re7 18. e4
+#4 Unnamed Line
+1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. cxd5 exd5 5. Bg5 Be7 6. e3 O-O 7. Bd3 c6 8. Qc2 h6 9. Bh4 Nbd7 10. Nge2 Re8 11. O-O Ne4 12. Bxe7 Qxe7 13. Rae1 f5 14. f3 Nxc3 15. Nxc3 g6 16. e4 dxe4 17. fxe4 Qd6 18. Qf2
+#5 Unnamed Line
+1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. cxd5 exd5 5. Bg5 Be7 6. e3 O-O 7. Bd3 c6 8. Qc2 a6 9. Bxf6 Bxf6 10. Bxh7+
+#6 Unnamed Line
+1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. cxd5 exd5 5. Bg5 Be7 6. e3 O-O 7. Bd3 c5 8. dxc5 Bxc5 9. Qc2 h6 10. Bxf6 Qxf6 11. Nxd5 Qd6 12. O-O-O Qxd5 13. Bh7+ Kh8 14. Rxd5
+#7 Unnamed Line
+1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. cxd5 exd5 5. Bg5 Be7 6. e3 O-O 7. Bd3 c5 8. dxc5 Nbd7 9. Nge2 Nxc5 10. O-O Nxd3 11. Qxd3 Be6 12. Rfd1
+#8 Unnamed Line
+1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. cxd5 exd5 5. Bg5 Be7 6. e3 O-O 7. Bd3 h6 8. Bh4 g5 9. Bg3 c6 10. h4 g4 11. Bf4 h5 12. Nge2
+#9 Unnamed Line
+1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. cxd5 exd5 5. Bg5 Be7 6. e3 O-O 7. Bd3 b6 8. Bxf6 Bxf6 9. Qh5 g6 10. Qxd5
+#10 Unnamed Line
+1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. cxd5 Nxd5 5. e4 Nxc3 6. bxc3 c5 7. Nf3 cxd4 8. cxd4 Bb4+ 9. Bd2 Bxd2+ 10. Qxd2 O-O 11. Bc4 Nd7 12. O-O b6 13. Rfe1 Bb7 14. Rad1 Rc8 15. Bb3 Re8 16. d5 exd5 17. exd5
+#11 Unnamed Line
+1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. cxd5 Nxd5 5. e4 Nxc3 6. bxc3 Be7 7. Nf3 O-O 8. Bd3 c5 9. O-O cxd4 10. cxd4 Nc6 11. Be3
+#12 Unnamed Line
+1. d4 d5 2. c4 e6 3. Nc3 c6 4. e4
+#13 Unnamed Line
+1. d4 d5 2. c4 e6 3. Nc3 c6 4. e4 dxe4 5. Nxe4 Bb4+ 6. Bd2 Qxd4 7. Bxb4 Qxe4+ 8. Be2 Na6 9. Ba5 b6 10. Qd6 Bd7 11. Bc3 f6 12. O-O-O O-O-O 13. Qa3 Kb7 14. Bf3 Qxc4 15. Be2
+#14 Unnamed Line
+1. d4 d5 2. c4 e6 3. Nc3 c6 4. e4 dxe4 5. Nxe4 Bb4+ 6. Bd2 Qxd4 7. Bxb4 Qxe4+ 8. Be2 Na6 9. Ba5 b6 10. Qd6 bxa5 11. Rd1 f6 12. f3 Qe3 13. Qxc6+
+#15 Unnamed Line
+1. d4 d5 2. c4 e6 3. Nc3 c6 4. e4 dxe4 5. Nxe4 Bb4+ 6. Bd2 Qxd4 7. Bxb4 Qxe4+ 8. Be2 Qxg2 9. Bf3 Qg6 10. Ne2
+#16 Unnamed Line
+1. d4 d5 2. c4 e6 3. Nc3 c6 4. e4 dxe4 5. Nxe4 Bb4+ 6. Bd2 Qxd4 7. Bxb4 Qxe4+ 8. Be2 Nd7 9. Nf3 c5 10. Bc3 Ngf6 11. Qd6
+#17 Unnamed Line
+1. d4 d5 2. c4 e6 3. Nc3 c6 4. e4 dxe4 5. Nxe4 Nf6 6. Nxf6+ Qxf6 7. Nf3 Bb4+ 8. Bd2 Bxd2+ 9. Qxd2 O-O 10. O-O-O
+#18 Unnamed Line
+1. d4 d5 2. c4 e6 3. Nc3 c6 4. e4 Nf6 5. cxd5 cxd5 6. e5 Ne4 7. Bd3 Nxc3 8. bxc3
+#19 Unnamed Line
+1. d4 d5 2. c4 e6 3. Nc3 c6 4. e4 Bb4 5. cxd5 cxd5 6. e5 Nc6 7. Nf3 Nge7 8. Bd3 O-O 9. Bxh7+ Kxh7 10. Ng5+ Kg8 11. Qh5 Re8 12. Qxf7+
+#20 Unnamed Line
+1. d4 d5 2. c4 e6 3. Nc3 dxc4 4. e4
+#21 Unnamed Line
+1. d4 d5 2. c4 e6 3. Nc3 c5 4. cxd5 exd5 5. Nf3 Nc6 6. dxc5 d4 7. Na4 Bxc5 8. Nxc5 Qa5+ 9. Bd2 Qxc5 10. Rc1 Qb6 11. e3 Qxb2 12. exd4 Nxd4 13. Bc3 Nxf3+ 14. gxf3
+#22 Unnamed Line
+1. d4 d5 2. c4 e6 3. Nc3 c5 4. cxd5 exd5 5. Nf3 Nc6 6. dxc5 Bxc5 7. Qxd5
+#23 Unnamed Line
+1. d4 d5 2. c4 e6 3. Nc3 c5 4. cxd5 cxd4 5. Qa4+ Bd7 6. Qxd4 exd5 7. Qxd5 Nc6 8. Nf3 Nf6 9. Qb3 Bc5 10. Bg5 h6 11. Bxf6 Qxf6 12. e3 O-O 13. Be2
+#24 Unnamed Line
+1. d4 d5 2. c4 e6 3. Nc3 Bb4 4. e3 Nf6 5. a3 Bxc3+ 6. bxc3 O-O 7. cxd5 exd5 8. Bd3 c5 9. Ne2 Nc6 10. O-O b6 11. Ng3 Bb7 12. f3 Re8 13. Ra2 Qc7 14. Re2 cxd4 15. cxd4
+#25 Unnamed Line
+1. d4 d5 2. c4 e6 3. Nc3 Bb4 4. e3 Nf6 5. a3 Bxc3+ 6. bxc3 O-O 7. cxd5 exd5 8. Bd3 c5 9. Ne2 cxd4 10. cxd4
+#26 Unnamed Line
+1. d4 d5 2. c4 e6 3. Nc3 Bb4 4. e3 Nf6 5. a3 Bxc3+ 6. bxc3 O-O 7. cxd5 Nxd5 8. Bd3 Nxc3 9. Qc2 Nd5 10. Bxh7+ Kh8 11. Bd3 Nc6 12. Nf3 Qd6 13. O-O
+#27 Unnamed Line
+1. d4 d5 2. c4 e6 3. Nc3 Bb4 4. e3 Bxc3+ 5. bxc3 Nf6 6. Ba3
+#28 Unnamed Line
+1. d4 d5 2. c4 Nf6 3. cxd5 Nxd5 4. e4 Nf6 5. Nc3 e5 6. Nf3 exd4 7. Qxd4 Qxd4 8. Nxd4
+#29 Unnamed Line
+1. d4 d5 2. c4 Nf6 3. cxd5 Nxd5 4. e4 Nf6 5. Nc3 e6 6. Nf3 Be7 7. Bf4
+#30 Unnamed Line
+1. d4 d5 2. c4 Nf6 3. cxd5 Qxd5 4. Nc3 Qd8 5. e4
+#31 Unnamed Line
+1. d4 d5 2. c4 e5 3. dxe5 d4 4. Nf3 Nc6 5. a3 Bg4 6. Nbd2 Nge7 7. Nb3 Bxf3 8. exf3 Nxe5 9. Qxd4 Qxd4 10. Nxd4 O-O-O 11. Be3
+#32 Unnamed Line
+1. d4 d5 2. c4 e5 3. dxe5 d4 4. Nf3 Nc6 5. a3 Bg4 6. Nbd2 Nge7 7. Nb3 Bxf3 8. exf3 Ng6 9. f4
+#33 Unnamed Line
+1. d4 d5 2. c4 e5 3. dxe5 d4 4. Nf3 Nc6 5. a3 a5 6. e3 Bc5 7. exd4 Nxd4 8. Be3 Nxf3+ 9. Qxf3
+#34 Unnamed Line
+1. d4 d5 2. c4 e5 3. dxe5 d4 4. Nf3 c5 5. e3 Nc6 6. exd4 cxd4 7. Bd3
+#35 Unnamed Line
+1. d4 d5 2. c4 dxc4 3. e4 e5 4. Nf3 exd4 5. Bxc4 Nc6 6. O-O Be6 7. Nbd2 Bxc4 8. Nxc4 Nf6 9. e5 Nd5 10. Nxd4 Nxd4 11. Qxd4 Nb6 12. Qf4
+#36 Unnamed Line
+1. d4 d5 2. c4 dxc4 3. e4 e5 4. Nf3 exd4 5. Bxc4 Nc6 6. O-O Be6 7. Nbd2 Nf6 8. Qb3 Bxc4 9. Nxc4 b6 10. Re1
+#37 Unnamed Line
+1. d4 d5 2. c4 dxc4 3. e4 e5 4. Nf3 exd4 5. Bxc4 Nc6 6. O-O Bg4 7. Qb3 Qd7 8. Bxf7+ Qxf7 9. Qxb7 Rd8 10. Qxc6+
+#38 Unnamed Line
+1. d4 d5 2. c4 dxc4 3. e4 e5 4. Nf3 exd4 5. Bxc4 Nc6 6. O-O Bg4 7. Qb3 Bxf3 8. Bxf7+ Kd7 9. Qe6#
+#39 Unnamed Line
+1. d4 d5 2. c4 dxc4 3. e4 e5 4. Nf3 exd4 5. Bxc4 c5 6. Ne5 Be6 7. Bxe6 fxe6 8. Qh5+ g6 9. Nxg6 Nf6 10. Qh3 hxg6 11. Qxh8
+#40 Unnamed Line
+1. d4 d5 2. c4 dxc4 3. e4 e5 4. Nf3 Bg4 5. Bxc4 exd4 6. Bxf7+ Kxf7 7. Ne5+ Ke8 8. Qxg4
+#41 Unnamed Line
+1. d4 d5 2. c4 dxc4 3. e4 e5 4. Nf3 Bg4 5. Bxc4 Bxf3 6. Qxf3 exd4 7. Qxf7#
+#42 Unnamed Line
+1. d4 d5 2. c4 dxc4 3. e4 b5 4. a4 c6 5. axb5 cxb5 6. Nc3 Bd7 7. d5
+#43 Unnamed Line
+1. d4 d5 2. c4 dxc4 3. e4 b5 4. a4 c6 5. axb5 cxb5 6. Nc3 Bd7 7. d5 e6 8. dxe6 fxe6 9. Nxb5 Bxb5 10. Qh5+ g6 11. Qxb5+
+#44 Unnamed Line
+1. d4 d5 2. c4 dxc4 3. e4 b5 4. a4 c6 5. axb5 cxb5 6. Nc3 Bd7 7. d5 e6 8. dxe6 Bxe6 9. Qxd8+ Kxd8 10. Nxb5
+#45 Unnamed Line
+1. d4 d5 2. c4 dxc4 3. e4 b5 4. a4 c6 5. axb5 cxb5 6. Nc3 Bd7 7. d5 a6 8. Nf3 e6 9. d6 Qb6 10. e5
+#46 Unnamed Line
+1. d4 d5 2. c4 dxc4 3. e4 b5 4. a4 c6 5. axb5 cxb5 6. Nc3 a6 7. Nxb5
+#47 Unnamed Line
+1. d4 d5 2. c4 dxc4 3. e4 b5 4. a4 c6 5. axb5 cxb5 6. Nc3 a6 7. Nxb5 axb5 8. Rxa8
+#48 Unnamed Line
+1. d4 d5 2. c4 dxc4 3. e4 b5 4. a4 c6 5. axb5 cxb5 6. Nc3 b4 7. Nb5 Bd7 8. Bxc4
+#49 Unnamed Line
+1. d4 d5 2. c4 dxc4 3. e4 b5 4. a4 c6 5. axb5 cxb5 6. Nc3 b4 7. Nb5 h6 8. Bf4
+#50 Unnamed Line
+1. d4 d5 2. c4 dxc4 3. e4 b5 4. a4 c6 5. axb5 cxb5 6. Nc3 b4 7. Nb5 Nf6 8. Bf4
+#51 Unnamed Line
+1. d4 d5 2. c4 dxc4 3. e4 b5 4. a4 a6 5. axb5 axb5 6. Rxa8
+#52 Unnamed Line
+1. d4 d5 2. c4 dxc4 3. e4 b5 4. a4 bxa4 5. Qxa4+ Bd7 6. Qxc4
+#53 Unnamed Line
+1. d4 d5 2. c4 dxc4 3. e4 e6 4. Bxc4 Nf6 5. Nc3 Bb4 6. e5 Nd5 7. Ne2 O-O 8. O-O c5 9. Qb3 Bxc3 10. bxc3 Nc6 11. Ba3 Na5 12. Qb5
+#54 Unnamed Line
+1. d4 d5 2. c4 dxc4 3. e4 e6 4. Bxc4 Nf6 5. Nc3 Be7 6. e5 Nd5 7. Qg4 O-O 8. Bh6 g6 9. Bxf8 Qxf8 10. Nf3
+#55 Unnamed Line
+1. d4 d5 2. c4 dxc4 3. e4 e6 4. Bxc4 Nf6 5. Nc3 c5 6. d5 exd5 7. Nxd5 Nxd5 8. Bxd5 Be7 9. Nf3
+#56 Unnamed Line
+1. d4 d5 2. c4 dxc4 3. e4 e6 4. Bxc4 Nf6 5. Nc3 c5 6. d5 exd5 7. Nxd5 Nxd5 8. Bxd5 h6 9. Bxf7+ Kxf7 10. Qxd8
+#57 Unnamed Line
+1. d4 d5 2. c4 dxc4 3. e4 e6 4. Bxc4 Nf6 5. Nc3 c5 6. d5 exd5 7. Nxd5 Nxe4 8. Qe2 Bf5 9. f3
+#58 Unnamed Line
+1. d4 d5 2. c4 c5 3. cxd5 Qxd5 4. Nf3 cxd4 5. Nc3 Qa5 6. Nxd4 e5 7. Nb3 Qc7 8. e4
+#59 Unnamed Line
+1. d4 d5 2. c4 c5 3. cxd5 Qxd5 4. Nf3 cxd4 5. Nc3 dxc3 6. Qxd5
+#60 Unnamed Line
+1. d4 d5 2. c4 c5 3. cxd5 cxd4 4. Qxd4 e6 5. e4 exd5 6. exd5 Nf6 7. Nc3
+#61 Unnamed Line
+1. d4 d5 2. c4 c5 3. cxd5 Nf6 4. e4 Nxe4 5. dxc5 Nxc5 6. Nc3 e6 7. Be3 exd5 8. Qxd5 Qxd5 9. Nxd5 Ne6 10. Nf3
+#62 Unnamed Line
+1. d4 d5 2. c4 Bf5 3. Qb3 dxc4 4. Qxb7 Nd7 5. Nc3 e6 6. e4 Bg6 7. Bxc4 Rb8 8. Qxa7
+#63 Unnamed Line
+1. d4 d5 2. c4 Bf5 3. Qb3 b6 4. cxd5 Nf6 5. Nc3
+#64 Unnamed Line
+1. d4 d5 2. c4 Bf5 3. Qb3 e6 4. Qxb7 Nd7 5. c5 e5 6. e3
+#65 Unnamed Line
+1. d4 d5 2. c4 Nc6 3. Nc3 Nf6 4. Nf3 e6 5. Bg5
+#66 Unnamed Line
+1. d4 d5 2. c4 Nc6 3. Nc3 dxc4 4. d5 Ne5 5. f4 Ng6 6. e4
+#67 Unnamed Line
+1. d4 d5 2. c4 c6 3. Nc3 Nf6 4. e3 e6 5. Nf3 Nbd7 6. Qc2 Bd6 7. g4 h6 8. Rg1 e5 9. cxd5 cxd5 10. Nb5 Bb8 11. g5 hxg5 12. Nxg5 e4 13. Bd2
+#68 Unnamed Line
+1. d4 d5 2. c4 c6 3. Nc3 Nf6 4. e3 e6 5. Nf3 Nbd7 6. Qc2 Bd6 7. g4 h6 8. Rg1 e5 9. cxd5 cxd5 10. Nb5 Bb8 11. g5 hxg5 12. Nxg5 e4 13. Bd2 Nb6 14. Rc1 Bd7 15. Bb4
+#69 Unnamed Line
+1. d4 d5 2. c4 c6 3. Nc3 Nf6 4. e3 e6 5. Nf3 Nbd7 6. Qc2 Bd6 7. g4 Nxg4 8. Rg1 Nxh2 9. Nxh2 Bxh2 10. Rxg7 Qf6 11. Rg2 Bd6 12. e4 Qxd4 13. Be3 Qf6 14. exd5 exd5 15. cxd5 cxd5 16. Nxd5 Qd8 17. O-O-O
+#70 Unnamed Line
+1. d4 d5 2. c4 c6 3. Nc3 Nf6 4. e3 e6 5. Nf3 Nbd7 6. Qc2 Bd6 7. g4 Nxg4 8. Rg1 Ngf6 9. Rxg7
+#71 Unnamed Line
+1. d4 d5 2. c4 c6 3. Nc3 Nf6 4. e3 e6 5. Nf3 Nbd7 6. Qc2 dxc4 7. Bxc4
+#72 Unnamed Line
+1. d4 d5 2. c4 c6 3. Nc3 Nf6 4. e3 Bf5 5. Qb3 Qb6 6. Qxb6 axb6 7. cxd5
+#73 Unnamed Line
+1. d4 d5 2. c4 c6 3. Nc3 Nf6 4. e3 Bf5 5. Qb3 Qb6 6. Qxb6 axb6 7. cxd5 Nxd5 8. Nxd5 cxd5 9. Nf3
+#74 Unnamed Line
+1. d4 d5 2. c4 c6 3. Nc3 Nf6 4. e3 Bf5 5. Qb3 b6 6. cxd5 cxd5 7. Bb5+ Nbd7 8. Nxd5
+#75 Unnamed Line
+1. d4 d5 2. c4 c6 3. Nc3 dxc4 4. e4 b5 5. a4 b4 6. Na2 Nf6 7. e5 Nd5 8. Bxc4 e6 9. Nf3 Be7 10. Bd2 a5 11. O-O O-O 12. Nc1 Nd7 13. Nb3 h6 14. Qe2
+#76 Unnamed Line
+1. d4 d5 2. c4 c6 3. Nc3 dxc4 4. e4 b5 5. a4 b4 6. Na2 Nf6 7. e5 Nd5 8. Bxc4 e6 9. Nf3 Be7 10. Bd2 O-O 11. Bxd5 cxd5 12. Bxb4
+#77 Unnamed Line
+1. d4 d5 2. c4 c6 3. Nc3 dxc4 4. e4 b5 5. a4 b4 6. Na2 a5 7. Bxc4 e6 8. Nf3 Nd7 9. Be3 h6 10. Nc1 g6 11. Nb3
+#78 Unnamed Line
+1. d4 d5 2. c4 c6 3. Nc3 dxc4 4. e4 b5 5. a4 Bd7 6. axb5 cxb5 7. d5
+#79 Unnamed Line
+1. d4 d5 2. c4 c6 3. Nc3 dxc4 4. e4 b5 5. a4 Bd7 6. axb5 cxb5 7. d5 e6 8. dxe6 fxe6 9. Nxb5 Bxb5 10. Qh5+ g6 11. Qxb5+
+#80 Unnamed Line
+1. d4 d5 2. c4 c6 3. Nc3 dxc4 4. e4 b5 5. a4 Bd7 6. axb5 cxb5 7. d5 e6 8. dxe6 Bxe6 9. Qxd8+ Kxd8 10. Nxb5
+#81 Unnamed Line
+1. d4 d5 2. c4 c6 3. Nc3 dxc4 4. e4 b5 5. a4 Bd7 6. axb5 cxb5 7. d5 a6 8. Nf3 e6 9. d6 Qb6 10. e5
+#82 Unnamed Line
+1. d4 d5 2. c4 c6 3. Nc3 dxc4 4. e4 b5 5. a4 a6 6. axb5 cxb5 7. Nxb5
+#83 Unnamed Line
+1. d4 d5 2. c4 c6 3. Nc3 dxc4 4. e4 b5 5. a4 a6 6. axb5 cxb5 7. Nxb5 axb5 8. Rxa8
+#84 Unnamed Line
+1. d4 d5 2. c4 c6 3. Nc3 e6 4. e4
+#85 Unnamed Line
+1. d4 d5 2. c4 c6 3. Nc3 e6 4. e4 dxe4 5. Nxe4 Bb4+ 6. Bd2 Qxd4 7. Bxb4 Qxe4+ 8. Be2 Na6 9. Ba5 b6 10. Qd6 Bd7 11. Bc3 f6 12. O-O-O O-O-O 13. Qa3 Kb7 14. Bf3 Qxc4 15. Be2
+#86 Unnamed Line
+1. d4 d5 2. c4 c6 3. Nc3 e6 4. e4 dxe4 5. Nxe4 Bb4+ 6. Bd2 Qxd4 7. Bxb4 Qxe4+ 8. Be2 Na6 9. Ba5 b6 10. Qd6 bxa5 11. Rd1 f6 12. f3 Qe3 13. Qxc6+
+#87 Unnamed Line
+1. d4 d5 2. c4 c6 3. Nc3 e6 4. e4 dxe4 5. Nxe4 Bb4+ 6. Bd2 Qxd4 7. Bxb4 Qxe4+ 8. Be2 Qxg2 9. Bf3 Qg6 10. Ne2
+#88 Unnamed Line
+1. d4 d5 2. c4 c6 3. Nc3 e6 4. e4 dxe4 5. Nxe4 Bb4+ 6. Bd2 Qxd4 7. Bxb4 Qxe4+ 8. Be2 Nd7 9. Nf3 c5 10. Bc3 Ngf6 11. Qd6
+#89 Unnamed Line
+1. d4 d5 2. c4 c6 3. Nc3 e6 4. e4 dxe4 5. Nxe4 Nf6 6. Nxf6+ Qxf6 7. Nf3 Bb4+ 8. Bd2 Bxd2+ 9. Qxd2 O-O 10. O-O-O
+#90 Unnamed Line
+1. d4 d5 2. c4 c6 3. Nc3 e6 4. e4 Nf6 5. cxd5 cxd5 6. e5 Ne4 7. Bd3 Nxc3 8. bxc3
+#91 Unnamed Line
+1. d4 d5 2. c4 c6 3. Nc3 e6 4. e4 Bb4 5. cxd5 cxd5 6. e5 Nc6 7. Nf3 Nge7 8. Bd3 O-O 9. Bxh7+ Kxh7 10. Ng5+ Kg8 11. Qh5 Re8 12. Qxf7+
+#92 Unnamed Line
+1. d4 d5 2. c4 c6 3. Nc3 Bf5 4. Qb3 Qb6 5. Qxb6 axb6 6. cxd5 cxd5 7. Nxd5`,
+  "slot8": `# Blitstream Scandi
+#1 Unnamed Line
+1. e4 d5 2. d3 dxe4 3. dxe4 Qxd1+ 4. Kxd1 f5 5. exf5 Bxf5 6. Nc3 Nc6 7. Bb5 O-O-O+ 8. Bd2 Nd4 9. Ba4 e5
+#2 Unnamed Line
+1. e4 d5 2. d3 dxe4 3. dxe4 Qxd1+ 4. Kxd1 f5 5. f3 fxe4 6. fxe4 Nf6 7. Nc3 Nc6 8. Nb5 Bg4+ 9. Nf3 O-O-O+
+#3 Unnamed Line
+1. e4 d5 2. Nc3 dxe4 3. Nxe4 Bf5 4. Ng3 Bg6 5. Nf3 Nd7 6. d4 Ngf6 7. Bc4 e6 8. O-O Be7 9. Bg5 O-O 10. Re1 c5 11. c3 cxd4
+#4 Unnamed Line
+1. e4 d5 2. Nc3 dxe4 3. Nxe4 Bf5 4. Ng3 Bg6 5. Nf3 Nd7 6. d4 Ngf6 7. Bc4 e6 8. O-O Be7 9. Bg5 O-O 10. Re1 c5 11. dxc5 Nxc5
+#5 Unnamed Line
+1. e4 d5 2. Nc3 dxe4 3. Nxe4 Bf5 4. Ng3 Bg6 5. Bd3 Bxd3 6. cxd3 Qxd3
+#6 Unnamed Line
+1. e4 d5 2. Nc3 dxe4 3. Nxe4 Bf5 4. Qf3 e6 5. Bc4 Nc6 6. d3 Ne5 7. Qe2 Nxc4 8. dxc4 Nf6 9. Nxf6+ Qxf6
+#7 Unnamed Line
+1. e4 d5 2. Nf3 dxe4 3. Ng5 Nf6 4. Nc3 Bf5 5. Bc4 e6
+#8 Unnamed Line
+1. e4 d5 2. Nf3 dxe4 3. Ne5 Nf6 4. Nc4 Bf5 5. d3 e6 6. Nbd2 Bc5 7. dxe4 Nxe4 8. Nxe4 Qxd1+ 9. Kxd1 Bxe4 10. b3 Nc6 11. Bb2 O-O-O+
+#9 Unnamed Line
+1. e4 d5 2. Nf3 dxe4 3. Ne5 Nf6 4. Bc4 e6 5. Nc3 Bd6 6. Nxf7 Kxf7 7. d4 exd3
+#10 Unnamed Line
+1. e4 d5 2. e5 c5 3. Nf3 Bg4 4. Be2 Nc6 5. O-O Bxf3 6. Bxf3 Nxe5
+#11 Unnamed Line
+1. e4 d5 2. e5 c5 3. Nf3 Bg4 4. d4 cxd4 5. Qxd4 Bxf3 6. gxf3 Nc6 7. Bb5 e6
+#12 Unnamed Line
+1. e4 d5 2. e5 c5 3. Nf3 Bg4 4. d4 cxd4 5. Qxd4 Bxf3 6. gxf3 Nc6 7. Bb5 e6 8. Be3 Ne7 9. Nc3 a6 10. Bxc6+ Nxc6
+#13 Unnamed Line
+1. e4 d5 2. e5 c5 3. Nf3 Bg4 4. c3 Nc6 5. d4 Bxf3 6. Qxf3 cxd4 7. cxd4 Nxd4
+#14 Unnamed Line
+1. e4 d5 2. e5 c5 3. Nf3 Bg4 4. c3 Nc6 5. d4 Bxf3 6. gxf3 e6 7. Bb5 Ne7
+#15 Unnamed Line
+1. e4 d5 2. e5 c5 3. d4 cxd4 4. Qxd4 Nc6 5. Bb5 Qa5+ 6. Nc3 e6 7. Bxc6+ bxc6 8. Bd2 Qb6 9. Qxb6 axb6 10. Nf3 Ba6 11. h3 Ne7 12. a3 Ng6 13. O-O-O Bc5 14. Be3 Bxe3+ 15. fxe3 h6
+#16 Unnamed Line
+1. e4 d5 2. e5 c5 3. d3 Nc6 4. Nf3 Bg4 5. Bf4 e6 6. h3 Bxf3 7. Qxf3 Nge7 8. Na3 Ng6 9. Nb5 Qa5+ 10. Nc3 d4
+#17 Unnamed Line
+1. e4 d5 2. exd5 Nf6 3. c4 c6 4. dxc6 Nxc6 5. Nf3 e5 6. Nc3 e4 7. Nh4 g5
+#18 Unnamed Line
+1. e4 d5 2. exd5 Nf6 3. c4 c6 4. dxc6 Nxc6 5. Nf3 e5 6. Nc3 e4 7. Ng5 Bf5 8. Qe2 Nd4 9. Qd1 e3
+#19 Unnamed Line
+1. e4 d5 2. exd5 Nf6 3. c4 c6 4. dxc6 Nxc6 5. Nf3 e5 6. d3 e4 7. dxe4 Qxd1+ 8. Kxd1 Nxe4 9. Be3 Bg4 10. Nd2 O-O-O 11. Kc1 Nxd2 12. Nxd2 Nb4
+#20 Unnamed Line
+1. e4 d5 2. exd5 Nf6 3. c4 c6 4. d6 exd6 5. d4 d5 6. Nc3 Bb4 7. a3 Bxc3+ 8. bxc3 O-O 9. Bf4 Re8+
+#21 Unnamed Line
+1. e4 d5 2. exd5 Nf6 3. Nc3 Nxd5 4. Nxd5 Qxd5 5. c4 Qe4+ 6. Ne2 Qxc4
+#22 Unnamed Line
+1. e4 d5 2. exd5 Nf6 3. Nc3 Nxd5 4. Nxd5 Qxd5 5. c4 Qe4+ 6. Qe2 Qxe2+ 7. Nxe2 e5
+#23 Unnamed Line
+1. e4 d5 2. exd5 Nf6 3. Nc3 Nxd5 4. Nxd5 Qxd5 5. c4 Qe4+ 6. Be2 Qxg2 7. Bf3 Qg6 8. d3 Nc6 9. Bf4 e5 10. Qe2 Bb4+ 11. Bd2 O-O 12. O-O-O Bf5
+#24 Unnamed Line
+1. e4 d5 2. exd5 Nf6 3. Nc3 Nxd5 4. Nxd5 Qxd5 5. Nf3 e5 6. d3 Nc6 7. Be2 Bg4 8. O-O O-O-O
+#25 Unnamed Line
+1. e4 d5 2. exd5 Nf6 3. Nc3 Nxd5 4. Nxd5 Qxd5 5. Nf3 e5 6. d3 Nc6 7. Be2 Bg4 8. O-O O-O-O 9. h3 Be6 10. Be3 f6
+#26 Unnamed Line
+1. e4 d5 2. exd5 Nf6 3. Nc3 Nxd5 4. Nxd5 Qxd5 5. d3 Nc6 6. Nf3 Bg4 7. Be2 O-O-O 8. O-O e5 9. c4 Qd7 10. h3 h5 11. hxg4 hxg4 12. Nh4 Rxh4
+#27 Unnamed Line
+1. e4 d5 2. exd5 Nf6 3. Bb5+ Bd7 4. Bxd7+ Qxd7 5. c4 c6 6. dxc6 Nxc6
+#28 Unnamed Line
+1. e4 d5 2. exd5 Nf6 3. Nf3 Nxd5 4. d4 g6 5. c4 Nb6 6. c5 Nd5
+#29 Unnamed Line
+1. e4 d5 2. exd5 Nf6 3. Nf3 Nxd5 4. d4 g6 5. c4 Nb6 6. Nc3 Bg7 7. Be2 O-O 8. O-O Bg4 9. Be3 Nc6 10. c5 Nd5
+#30 Unnamed Line
+1. e4 d5 2. exd5 Nf6 3. Nf3 Nxd5 4. d4 g6 5. c4 Nb6 6. Nc3 Bg7 7. Be2 O-O 8. O-O Bg4 9. Be3 Nc6 10. d5 Bxf3 11. Bxf3 Ne5 12. b3 Nxf3+ 13. Qxf3 Bxc3
+#31 Unnamed Line
+1. e4 d5 2. exd5 Nf6 3. Nf3 Nxd5 4. d4 g6 5. c4 Nb6 6. Nc3 Bg7 7. Be2 O-O 8. O-O Bg4 9. Be3 Nc6 10. d5 Bxf3 11. Bxf3 Ne5 12. b3 Nxf3+ 13. Qxf3 Bxc3 14. Bxb6 Bxa1 15. Rxa1 axb6
+#32 Unnamed Line
+1. e4 d5 2. exd5 Nf6 3. d4 Nxd5 4. Nc3 Nxc3 5. bxc3 g6 6. Nf3 Bg7 7. Bc4 O-O 8. O-O c5 9. dxc5 Qa5
+#33 Unnamed Line
+1. e4 d5 2. exd5 Nf6 3. d4 Nxd5 4. Nc3 Nxc3 5. bxc3 g6 6. Nf3 Bg7 7. Bc4 O-O 8. O-O c5 9. Be3 Nc6 10. Re1 Bg4 11. h3 Bxf3 12. Qxf3 cxd4 13. cxd4 Nxd4 14. Bxd4 Qxd4 15. Bb3 e6 16. Qxb7 Qxa1 17. Rxa1 Bxa1
+#34 Unnamed Line
+1. e4 d5 2. exd5 Nf6 3. d6 exd6 4. Nf3 Nc6 5. Bb5 a6 6. Bxc6+ bxc6 7. O-O Be7 8. d4 O-O
+#35 Unnamed Line
+1. e4 d5 2. d4 dxe4 3. Nc3 Nf6 4. Bf4 Bf5 5. f3 e6
+#36 Unnamed Line
+1. e4 d5 2. d4 dxe4 3. Nc3 Nf6 4. Bg5 Bf5 5. d5 e6 6. dxe6 Qxd1+ 7. Nxd1 Bxe6`
 };
 
 // ── Slot defaults (8 slots, 6 with PGN, 2 empty) ─────────────────
 var SLOT_DEFAULTS = [
-  {id:"slot1", name:"JBV",  desc:"Jobava main lines",        color:"white", drill:false},
-  {id:"slot2", name:"JSL",  desc:"Jobava sidelines",          color:"white", drill:false},
-  {id:"slot3", name:"Scam", desc:"Modern Scandinavian",       color:"black", drill:false},
-  {id:"slot4", name:"QGA",  desc:"Queen's Gambit Accepted",  color:"black", drill:false},
-  {id:"slot5", name:"QGD",  desc:"Queen's Gambit Declined",  color:"black", drill:false},
-  {id:"slot6", name:"Caro", desc:"Caro-Kann Defence",         color:"black", drill:false},
-  {id:"slot7", name:"",     desc:"",                          color:"white", drill:false},
-  {id:"slot8", name:"",     desc:"",                          color:"white", drill:false}
+  {id:"slot1", name:"JBV", desc:"Jobava main lines", color:"white", drill:false},
+  {id:"slot2", name:"JSL", desc:"Jobava sidelines", color:"white", drill:false},
+  {id:"slot3", name:"Scam", desc:"Modern Scandinavian", color:"black", drill:false},
+  {id:"slot4", name:"QGA", desc:"Queen's Gambit Accepted", color:"white", drill:false},
+  {id:"slot5", name:"QGD", desc:"Queen's Gambit Declined", color:"black", drill:false},
+  {id:"slot6", name:"Caro", desc:"Caro-Kann Defence", color:"black", drill:false},
+  {id:"slot7", name:"QG", desc:"Empty slot", color:"white", drill:false},
+  {id:"slot8", name:"SCAB", desc:"scandi blitscream", color:"black", drill:false}
 ];
 
 var PARAMS_KEY = "chess-trainer-params";   // {id: {name,desc,color,drill}}
