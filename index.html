@@ -127,8 +127,11 @@ html,body{height:100%;width:100%;background:var(--bg2);color:var(--text);
 #prog-fill{height:100%;background:var(--green-lt);border-radius:3px;transition:width .3s}
 #prog-txt{font-size:10px;color:var(--dim);width:40px;text-align:right;flex-shrink:0}
 #movelist-row{padding:8px 12px 6px}
-#movelist-lbl{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--dim);margin-bottom:4px}
-#movelist{display:flex;flex-wrap:wrap;gap:1px 2px;font-size:11px;font-family:monospace}
+#movelist-hdr{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+#movelist-lbl{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--dim)}
+#movelist-copy{padding:1px 6px;border-radius:4px;border:1px solid var(--border2);background:var(--panel2);color:var(--dim);cursor:pointer;font-size:9px;font-weight:700;margin-left:auto}
+#movelist-copy:hover{border-color:var(--blue);color:var(--blue)}
+#movelist{display:flex;flex-wrap:wrap;gap:1px 2px;font-size:11px;font-family:monospace;user-select:text;cursor:text}
 .ml-n{color:var(--dim);padding:1px 2px}.ml-m{padding:1px 4px;border-radius:3px;color:#383d56}
 .ml-m.done{color:var(--text)}.ml-m.current{background:var(--green-bg);color:var(--green-lt);font-weight:700}
 .ml-m.annotated{position:relative;padding-right:9px}
@@ -242,6 +245,7 @@ html,body{height:100%;width:100%;background:var(--bg2);color:var(--text);
       <div class="sb-logo">
         <div class="sb-logo-icon">♟</div>
         <div><div class="sb-logo-name">Repertoire</div><div class="sb-logo-sub">Trainer</div></div>
+        <button onclick="exportHtml()" title="Export HTML with all repertoires baked in" style="margin-left:auto;padding:3px 8px;border-radius:6px;border:1px solid var(--border2);background:var(--panel2);color:var(--dim);cursor:pointer;font-size:10px;font-weight:700;flex-shrink:0">⬇ Export</button>
       </div>
       <div id="rep-home-grid"></div>
       <div id="home-load-section">
@@ -261,7 +265,6 @@ html,body{height:100%;width:100%;background:var(--bg2);color:var(--text);
       <div id="sb-params-topbar">
         <button id="sb-params-back" onclick="goHome()">←</button>
         <span id="sb-params-title">—</span>
-        <button id="sb-params-export" onclick="exportHtml()" title="Export HTML with all repertoires baked in" style="padding:4px 8px;border-radius:6px;border:1px solid var(--border2);background:var(--panel2);color:var(--dim);cursor:pointer;font-size:11px;font-weight:700;flex-shrink:0">⬇ Export</button>
         <button id="sb-params-save" onclick="saveParamsAndGoHome()" title="Save and return">💾</button>
         <button id="sb-params-play" onclick="startRep()" disabled title="Start session">▶</button>
       </div>
@@ -290,22 +293,10 @@ html,body{height:100%;width:100%;background:var(--bg2);color:var(--text);
         </div>
         <div style="border-top:1px solid var(--border);margin:4px -12px 0;padding:10px 12px 0;display:flex;flex-direction:column;gap:6px">
           <div class="param-lbl">Import PGN</div>
-          <div id="import-lock">
-            <button id="import-hold-btn"
-              onmousedown="startImportHold()" onmouseup="cancelImportHold()" onmouseleave="cancelImportHold()"
-              ontouchstart="startImportHold(event)" ontouchend="cancelImportHold()" ontouchcancel="cancelImportHold()"
-              style="width:100%;padding:7px;border-radius:8px;border:1px solid var(--border2);background:var(--panel2);color:var(--dim);cursor:pointer;font-size:11px;font-weight:700;position:relative;overflow:hidden;user-select:none">
-              <span id="import-hold-label">Hold to unlock import</span>
-              <div id="import-hold-bar" style="position:absolute;left:0;top:0;height:100%;width:0%;background:rgba(212,160,23,.25);transition:none;pointer-events:none"></div>
-            </button>
-            <div id="import-pin-status" class="load-status" style="margin-top:2px"></div>
-          </div>
-          <div id="import-controls" style="display:none;flex-direction:column;gap:6px">
-            <input type="file" id="import-file-input" accept=".pgn,.txt" style="position:absolute;opacity:0;width:0;height:0">
-            <label for="import-file-input" class="load-btn">📂 Open file</label>
-            <textarea class="pgn-paste" id="params-paste-area" placeholder="…or paste PGN here" spellcheck="false"></textarea>
-            <button class="load-sub-btn" onclick="paramsLoadFromPaste()">↳ Load pasted text</button>
-          </div>
+          <input type="file" id="import-file-input" accept=".pgn,.txt" style="position:absolute;opacity:0;width:0;height:0">
+          <label for="import-file-input" class="load-btn">📂 Open file</label>
+          <textarea class="pgn-paste" id="params-paste-area" placeholder="…or paste PGN here" spellcheck="false"></textarea>
+          <button class="load-sub-btn" onclick="paramsLoadFromPaste()">↳ Load pasted text</button>
           <div id="import-status" class="load-status"></div>
         </div>
       </div>
@@ -316,6 +307,7 @@ html,body{height:100%;width:100%;background:var(--bg2);color:var(--text);
       <div id="sb-active-topbar">
         <button id="sb-active-back" onclick="goHome()">←</button>
         <span id="sb-active-repname">—</span>
+        <button onclick="analyseLichess()" title="Analyse on Lichess" style="padding:4px 7px;border-radius:6px;border:1px solid var(--border2);background:var(--panel2);color:var(--dim);cursor:pointer;font-size:11px;font-weight:700;flex-shrink:0">⚡ Analyse</button>
         <button id="sb-active-settings" onclick="goParams()" title="Settings" style="padding:4px 7px;border-radius:6px;border:1px solid var(--border2);background:var(--panel2);color:var(--dim);cursor:pointer;font-size:12px;flex-shrink:0">⚙</button>
       </div>
       <div id="sb-active-reptitle" style="padding:4px 12px 5px;font-size:10px;color:var(--dim);font-style:italic;border-bottom:1px solid var(--border);flex-shrink:0;display:none"></div>
@@ -330,7 +322,10 @@ html,body{height:100%;width:100%;background:var(--bg2);color:var(--text);
           <div id="prog-txt">0 / 0</div>
         </div>
         <div id="movelist-row">
-          <div id="movelist-lbl">Moves</div>
+          <div id="movelist-hdr">
+            <div id="movelist-lbl">Moves</div>
+            <button id="movelist-copy" onclick="copyMovelist()" title="Copy moves">Copy</button>
+          </div>
           <div id="movelist"></div>
         </div>
       </div>
@@ -1806,7 +1801,6 @@ function goParams() {
   document.getElementById("welcome").style.display = "flex";
   document.getElementById("trainer").style.display = "none";
   document.getElementById("drill-modal-overlay").classList.remove("open");
-  resetImportLock();
   refreshParamsUI();
 }
 
@@ -1829,7 +1823,6 @@ function goActive() {
 function selectSlot(id) {
   _currentSlot = id;
   setImportStatus("");
-  resetImportLock();
   document.getElementById("sb-home").style.display = "none";
   document.getElementById("sb-params").style.display = "flex";
   refreshParamsUI();
@@ -1901,58 +1894,7 @@ function renderHomeGrid() {
   });
 }
 
-var IMPORT_HOLD_MS = 3000;
-var _importHoldTimer = null;
-var _importHoldStart = null;
-var _importHoldRaf = null;
 
-function startImportHold(e) {
-  if (e) e.preventDefault();
-  _importHoldStart = Date.now();
-  var bar = document.getElementById("import-hold-bar");
-  var lbl = document.getElementById("import-hold-label");
-  bar.style.transition = "none";
-  bar.style.width = "0%";
-
-  function tick() {
-    var elapsed = Date.now() - _importHoldStart;
-    var pct = Math.min(100, elapsed / IMPORT_HOLD_MS * 100);
-    bar.style.width = pct + "%";
-    if (pct < 100) {
-      _importHoldRaf = requestAnimationFrame(tick);
-    } else {
-      unlockImport();
-    }
-  }
-  _importHoldRaf = requestAnimationFrame(tick);
-}
-
-function cancelImportHold() {
-  if (_importHoldRaf) { cancelAnimationFrame(_importHoldRaf); _importHoldRaf = null; }
-  _importHoldStart = null;
-  var bar = document.getElementById("import-hold-bar");
-  if (bar) { bar.style.transition = "width .2s"; bar.style.width = "0%"; }
-}
-
-function unlockImport() {
-  cancelImportHold();
-  document.getElementById("import-lock").style.display = "none";
-  document.getElementById("import-controls").style.display = "flex";
-  var status = document.getElementById("import-pin-status");
-  if (status) status.textContent = "";
-  setImportStatus("");
-}
-
-function resetImportLock() {
-  document.getElementById("import-lock").style.display = "";
-  document.getElementById("import-controls").style.display = "none";
-  var bar = document.getElementById("import-hold-bar");
-  if (bar) { bar.style.transition = "none"; bar.style.width = "0%"; }
-  var status = document.getElementById("import-pin-status");
-  if (status) { status.textContent = ""; status.className = "load-status"; }
-  setImportStatus("");
-  cancelImportHold();
-}
 function setImportStatus(msg, type) {
   var el = document.getElementById("import-status");
   if (el) { el.textContent = msg; el.className = "load-status" + (type ? " "+type : ""); }
@@ -2039,6 +1981,44 @@ function homeLoadFromPaste() {
   if (!text) { setHomeLoadStatus("Paste PGN text first", "err"); return; }
   homeImportPgn(text, "pasted text");
   document.getElementById("home-paste-area").value = "";
+}
+
+function copyMovelist() {
+  var text = S.moves.map(function(m, i) {
+    return (i % 2 === 0 ? (Math.floor(i/2)+1) + ". " : "") + m.san;
+  }).join(" ");
+  navigator.clipboard.writeText(text).then(function() {
+    var btn = document.getElementById("movelist-copy");
+    btn.textContent = "✓";
+    setTimeout(function() { btn.textContent = "Copy"; }, 1500);
+  }).catch(function() {
+    // Fallback for file:// or older browsers
+    var ta = document.createElement("textarea");
+    ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    document.execCommand("copy");
+    document.body.removeChild(ta);
+    var btn = document.getElementById("movelist-copy");
+    btn.textContent = "✓";
+    setTimeout(function() { btn.textContent = "Copy"; }, 1500);
+  });
+}
+
+function analyseLichess() {
+  if (S.gameIdx < 0 || !S.moves.length) return;
+  var params = getParams(_currentSlot);
+  var color = params ? params.color : S.playerColor;
+  // Build PGN with FEN header + moves played so far
+  var movesPlayed = S.moves.slice(0, S.moveIdx);
+  var pgnMoves = movesPlayed.map(function(m, i) {
+    var prefix = (i % 2 === 0) ? (Math.floor(i / 2) + 1) + ". " : "";
+    return prefix + m.san;
+  }).join(" ");
+  // Starting FEN is always standard — Lichess expects [FEN "..."] header + moves
+  var startFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+  var pgn = '[FEN "' + startFen + '"]\n' + pgnMoves;
+  var url = "https://lichess.org/analysis/pgn/" + encodeURIComponent(pgn) + "?color=" + color;
+  window.open(url, "_blank", "noopener");
 }
 
 // ── Export HTML ───────────────────────────────────────────────────
