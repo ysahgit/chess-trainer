@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Chess Repertoire Trainer</title>
-<link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#13141b">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1464,7 +1463,7 @@ function selectGame(idx, usePrevPrefix) {
   document.getElementById("trainer").style.display = "flex";
   if (!board) { window._pendingGame = {idx: idx, prevMoves: prevMoves}; return; }
   var params = getParams(_currentSlot);
-  board.setOrientation(params.color === "black" ? _COLOR.black : _COLOR.white);
+  board.setOrientation(S.playerColor === "black" ? _COLOR.black : _COLOR.white);
   board.setPosition(S.fen, false);
   try { board.removeMarkers(_MT.dot); } catch(e) {}
   board.disableMoveInput(); board.enableMoveInput(handleMoveInput);
@@ -1477,15 +1476,15 @@ function selectGame(idx, usePrevPrefix) {
     S.busy = true;
     autoplayPrefix(S.moves, prevMoves, function() {
       S.busy = false;
-      // Check if still need opponent to move
       if (S.moveIdx < S.moves.length &&
-          (chessEngine.turn() === "w" ? "white" : "black") !== params.color) {
+          (chessEngine.turn() === "w" ? "white" : "black") !== S.playerColor) {
         runOpponent();
       }
     });
   } else {
-    if ((chessEngine.turn() === "w" ? "white" : "black") !== params.color) {
-      setTimeout(function() { runOpponent(); }, S.mode === "drill" ? 0 : 300);
+    if ((chessEngine.turn() === "w" ? "white" : "black") !== S.playerColor) {
+      var _delay = S.mode === "drill" ? 50 : 300;
+      setTimeout(function() { S.busy = false; runOpponent(0); }, _delay);
     }
   }
 }
@@ -1727,6 +1726,13 @@ function flipBoard() {
   if (!board) return;
   S.playerColor = S.playerColor === "white" ? "black" : "white";
   board.setOrientation(S.playerColor === "black" ? _COLOR.black : _COLOR.white);
+  // If it's now the opponent's turn, trigger their move
+  if (S.moves && S.moveIdx < S.moves.length && !S.busy) {
+    if ((chessEngine.turn() === "w" ? "white" : "black") !== S.playerColor) {
+      S.busy = false;
+      runOpponent(300);
+    }
+  }
 }
 
 // ── UI updates ────────────────────────────────────────────────────
@@ -1924,7 +1930,6 @@ function homeImportPgn(text, label) {
   try {
     var games = parsePgn(text);
     if (!games.length) { setHomeLoadStatus("No valid moves found", "err"); return; }
-    // Start a practice session directly with no slot
     _currentSlot = null;
     S.games = games;
     S.repTitle = games.repTitle || "";
@@ -1935,8 +1940,7 @@ function homeImportPgn(text, label) {
     S.erroredLines = new Set();
     S.drillDone = new Set();
     S.errorPassOnly = false;
-    S.drillQueue = games.map(function(_,i){return i;});
-    S.drillQueue.shift();
+    S.drillQueue = games.map(function(_,i){return i;}).slice(1);
     updateScores(); updateProgress();
     goActive();
     document.getElementById("sb-active-repname").textContent = label.replace(/\.(pgn|txt)$/i,"");
@@ -2132,8 +2136,7 @@ if (window._pendingGame !== undefined) {
   var pg = window._pendingGame;
   window._pendingGame = undefined;
   setTimeout(function() {
-    var params = getParams(_currentSlot);
-    board.setOrientation(params.color === "black" ? _COLOR.black : _COLOR.white);
+    board.setOrientation(S.playerColor === "black" ? _COLOR.black : _COLOR.white);
     board.setPosition(S.fen, false);
     try { board.removeMarkers(_MT.dot); } catch(e) {}
     board.disableMoveInput(); board.enableMoveInput(handleMoveInput);
@@ -2141,7 +2144,7 @@ if (window._pendingGame !== undefined) {
     document.getElementById("btn-next").style.display = "";
     document.getElementById("btn-flip").style.display = S.mode === "drill" ? "none" : "";
     updateStatusBar(); updateMovelist();
-    if ((chessEngine.turn() === "w" ? "white" : "black") !== params.color) {
+    if ((chessEngine.turn() === "w" ? "white" : "black") !== S.playerColor) {
       runOpponent(S.mode === "drill" ? 0 : 300);
     }
   }, 50);
